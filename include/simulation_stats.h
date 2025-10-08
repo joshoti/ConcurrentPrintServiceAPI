@@ -1,0 +1,53 @@
+#ifndef SIMULATION_STATS_H
+#define SIMULATION_STATS_H
+
+typedef struct {
+    // --- General Simulation Metrics ---
+    unsigned long simulation_duration_us; // Total simulation time in microseconds
+
+    // --- Job Arrival & Flow Metrics ---
+    double total_jobs_arrived;                // Count of all jobs that entered the system
+    double total_jobs_served;                 // Count of jobs that successfully printed
+    double total_jobs_dropped;                // Count of jobs dropped (e.g., queue full)
+    unsigned long total_inter_arrival_time_us; // Sum of time between arrivals for calculating the average
+
+    // --- System & Queue Performance Metrics ---
+    unsigned long total_system_time_us;      // Sum of time each SERVED job spent in the system (wait + service)
+    double sum_of_system_time_squared_us2;      // Sum of (system_time)^2 for calculating standard deviation
+    unsigned long total_queue_wait_time_us;   // Sum of time each SERVED job spent waiting in the queue
+    unsigned long area_num_in_job_queue_us;  // Integral of queue length over time, for avg queue length
+    unsigned int max_job_queue_length;         // Peak number of jobs ever in the queue
+
+    // --- Printer 1 (S1) Metrics ---
+    double jobs_served_by_printer1;            // Total jobs completed by printer 1
+    unsigned long total_service_time_p1_us;   // Sum of service times for jobs on printer 1
+    unsigned long printer1_busy_time_us;     // Total time printer 1 was busy (printing)
+    unsigned long printer1_paper_empty_time_us; // Total time printer 1 was idle due to no paper
+
+    // --- Printer 2 (S2) Metrics ---
+    double jobs_served_by_printer2;            // Total jobs completed by printer 2
+    unsigned long total_service_time_p2_us;   // Sum of service times for jobs on printer 2
+    unsigned long printer2_busy_time_us;     // Total time printer 2 was busy (printing)
+    unsigned long printer2_paper_empty_time_us; // Total time printer 2 was idle due to no paper
+
+    // --- Paper Refill Metrics ---
+    double paper_refill_events;               // Number of times the paper was refilled
+    unsigned long total_refill_service_time_us; // Total time spent actively refilling paper
+
+} SimulationStatistics;
+
+/**
+ * @brief Calculates and prints all relevant simulation statistics.
+ *
+ * @param stats A simulation statistics struct.
+ */
+void publish_statistics(SimulationStatistics stats);
+
+/**
+ * @brief Prints all raw statistics for debugging purposes.
+ *
+ * @param stats A simulation statistics struct.
+ */
+void debug_statistics(SimulationStatistics stats);
+
+#endif // SIMULATION_STATS_H
