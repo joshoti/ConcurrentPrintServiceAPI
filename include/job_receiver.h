@@ -4,10 +4,10 @@
 // --- Job structure ---
 typedef struct {
     // --- Job Attributes ---
-    int job_id;
+    int id;
     int inter_arrival_time_us; // time between this packet and the previous packet
     int papers_required; // number of papers required by the job
-    int service_time_requested_us; // time required to service the job
+    int service_time_requested_ms; // time required to service the job
     
     // --- Timestamps for tracking job lifecycle ---
     unsigned long system_arrival_time_us; // time job arrived to the system
@@ -25,21 +25,21 @@ typedef struct {
  * @param job_id Unique identifier for the job.
  * @param inter_arrival_time_us Time between this job and the previous job in microseconds.
  * @param papers_required Number of papers required by the job.
- * @param service_time_requested_us Time required to service the job in microseconds.
+ * @param service_time_requested_ms Time required to service the job in milliseconds.
  * @return 1 on success, 0 on failure (e.g., invalid parameters).
  */
 int init_job(Job* job, int job_id, int inter_arrival_time_us,
-    int papers_required, int service_time_requested_us);
+    int papers_required, int service_time_requested_ms);
 
 /**
  * @brief Retrieves job information from random generator or the input file.
  * @param inter_arrival_time_us Pointer to store the inter-arrival time.
  * @param papers_required Pointer to store the number of papers required.
- * @param service_time_requested_us Pointer to store the service time requested.
+ * @param service_time_requested_ms Pointer to store the service time requested.
  * @param line_num The line number in the input file to read the job from.
  */
 void get_job_info(int* inter_arrival_time_us, int* papers_required,
-    int* service_time_requested_us, int line_num);
+    int* service_time_requested_ms, int line_num);
 /**
  * @brief Simulates dropping a job from the system. Updates statistics accordingly.
  * @param job Pointer to the Job struct to drop.

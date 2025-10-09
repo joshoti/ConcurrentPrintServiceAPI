@@ -7,6 +7,15 @@
  *        and shared variables for command line argument processing and thread management.
  */
 
+typedef struct {
+    double job_arrival_time;
+    double job_printing_time;
+    int queue_capacity;
+    int printer_paper_capacity;
+    double refill_time;
+    int num_jobs;
+} SimulationParameters;
+
 /**
  * @brief Print usage information for the program.
  */

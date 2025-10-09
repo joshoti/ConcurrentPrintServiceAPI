@@ -36,4 +36,9 @@ void time_in_us_to_ms(unsigned long current_time_us, int* time_ms, int* time_us)
  */
 struct timespec get_wake_up_time(int time_ms);
 
+/** 
+ * Format string for time output: "milliseconds.microseconds"
+ */
+char time_format[20] = "%08d.%03dms: ";
+
 #endif // TIMEUTILS_H

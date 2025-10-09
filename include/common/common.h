@@ -1,6 +1,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+extern int g_debug;
+extern int terminate_now;
+
 #ifndef TRUE
 #define FALSE 0
 #define TRUE 1

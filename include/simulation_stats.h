@@ -21,13 +21,11 @@ typedef struct {
     // --- Printer 1 (S1) Metrics ---
     double jobs_served_by_printer1;            // Total jobs completed by printer 1
     unsigned long total_service_time_p1_us;   // Sum of service times for jobs on printer 1
-    unsigned long printer1_busy_time_us;     // Total time printer 1 was busy (printing)
     unsigned long printer1_paper_empty_time_us; // Total time printer 1 was idle due to no paper
 
     // --- Printer 2 (S2) Metrics ---
     double jobs_served_by_printer2;            // Total jobs completed by printer 2
     unsigned long total_service_time_p2_us;   // Sum of service times for jobs on printer 2
-    unsigned long printer2_busy_time_us;     // Total time printer 2 was busy (printing)
     unsigned long printer2_paper_empty_time_us; // Total time printer 2 was idle due to no paper
 
     // --- Paper Refill Metrics ---
@@ -41,13 +39,13 @@ typedef struct {
  *
  * @param stats A simulation statistics struct.
  */
-void publish_statistics(SimulationStatistics stats);
+void publish_statistics(SimulationStatistics* stats);
 
 /**
  * @brief Prints all raw statistics for debugging purposes.
  *
  * @param stats A simulation statistics struct.
  */
-void debug_statistics(SimulationStatistics stats);
+void debug_statistics(const SimulationStatistics* stats);
 
 #endif // SIMULATION_STATS_H
