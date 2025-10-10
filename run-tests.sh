@@ -1,3 +1,4 @@
-make -f Makefile.test
+make -f MakefileTest.mk
 ./test_linked_list
-make -f Makefile.test clean
+./test_preprocessing
+make -f MakefileTest.mk clean

@@ -8,11 +8,11 @@
  */
 
 typedef struct {
-    double job_arrival_time;
-    double job_printing_time;
+    double job_arrival_time_us;
+    double job_printing_time_us;
     int queue_capacity;
     int printer_paper_capacity;
-    double refill_time;
+    double refill_time_us;
     int num_jobs;
 } SimulationParameters;
 
@@ -40,8 +40,9 @@ int is_positive_integer(const char* str, int value);
  * @brief Process command line arguments
  * @param argc Argument count
  * @param argv Argument vector
+ * @param params Pointer to SimulationParameters struct to populate
  * @return 0 on failure, 1 on success
  */
-int process_args(int argc, char *argv[]);
+int process_args(int argc, char *argv[], SimulationParameters* params);
 
 #endif // PREPROCESSING_H

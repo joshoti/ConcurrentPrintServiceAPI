@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "common.h"
 #include "linked_list.h"
+#include "test_utils.h"
 
 static void trim(char *string) {
     // Remove leading spaces
@@ -110,9 +111,8 @@ int print_all_elements_and_compare(LinkedList* list, char* expected) {
 }
 
 int main() {
-    printf("===============================\n");
-    printf("[LINKED LIST] Starting test suite...\n");
-    printf("===============================\n");
+    char test_name[] = "LINKED LIST";
+    print_test_start(test_name);
 
     int failed_test_count = 0;
     test_bad_list_init(NULL);
@@ -174,8 +174,6 @@ int main() {
     // Test if list is empty
     printf("List is empty, should be 1: %d\n", test_list_is_empty(&list));
 
-    printf("===============================\n");
-    printf("[LINKED LIST] Total failed tests: %d\n", failed_test_count);
-    printf("===============================\n");
+    print_test_end(test_name, failed_test_count);
     return 0;
 }
