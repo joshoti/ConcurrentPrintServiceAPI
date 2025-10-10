@@ -37,8 +37,8 @@ void publish_simulation_parameters(const SimulationParameters* params, struct mg
     sprintf(buf, "{\"type\":\"params\", \"params\": {\"job_arrival_time\":%.6g,\
         \"job_printing_time\":%.6g, \"queue_capacity\":%d,\
         \"printer_paper_capacity\":%d, \"refill_time\":%.6g, \"num_jobs\":%d}}",
-            params->job_arrival_time, params->job_printing_time, params->queue_capacity,
-            params->printer_paper_capacity, params->refill_time, params->num_jobs);
+            params->job_arrival_time_us, params->job_printing_time_us, params->queue_capacity,
+            params->printer_paper_capacity, params->refill_time_us, params->num_jobs);
     if (ws_conn) {
         mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
     }
