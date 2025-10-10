@@ -9,17 +9,46 @@
 
 typedef struct {
     double job_arrival_time_us;
-    double job_printing_time_us;
+    int papers_required_lower_bound;
+    int papers_required_upper_bound;
     int queue_capacity;
+    double printing_rate;
     int printer_paper_capacity;
-    double refill_time_us;
+    double refill_rate;
     int num_jobs;
 } SimulationParameters;
+
+/**
+ * job_arrival_time_us: 300,000 us = 1 job every 0.3 sec
+ * papers_required_lower_bound: 20 pages
+ * papers_required_upper_bound: 30 pages
+ * queue_capacity: 30 jobs
+ * printing_rate: 3.3 papers/sec
+ * printer_paper_capacity: 200 pages
+ * refill_rate: 15 papers/sec
+ * num_jobs: 10 jobs
+ */
+#define SIMULATION_DEFAULT_PARAMS {300000, 20, 30, 30, 3.3, 200, 15, 10}
 
 /**
  * @brief Print usage information for the program.
  */
 void usage();
+
+/**
+ * @brief Generate a random integer between lower and upper (inclusive).
+ * @param lower The lower bound inclusive.
+ * @param upper The upper bound inclusive.
+ * @return A random integer between lower and upper.
+ */
+int random_between(int lower, int upper);
+
+/**
+ * @brief Swap the values of lower and upper bounds if lower is greater than upper.
+ * @param lower Pointer to the lower bound.
+ * @param upper Pointer to the upper bound.
+ */
+void swap_bounds(int* lower, int* upper);
 
 /**
  * @brief Check if a double value is positive.
