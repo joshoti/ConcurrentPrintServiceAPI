@@ -9,6 +9,7 @@ typedef struct {
     double total_jobs_arrived;                // Count of all jobs that entered the system
     double total_jobs_served;                 // Count of jobs that successfully printed
     double total_jobs_dropped;                // Count of jobs dropped (e.g., queue full)
+    double total_jobs_removed;                // Count of jobs removed due to premature termination
     unsigned long total_inter_arrival_time_us; // Sum of time between arrivals for calculating the average
 
     // --- System & Queue Performance Metrics ---
