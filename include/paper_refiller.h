@@ -23,7 +23,7 @@ typedef struct PaperRefillerThreadArgs {
     // TODO: confirm
     pthread_mutex_t* paper_refill_queue_mutex;
     pthread_mutex_t* stats_mutex;
-    pthread_mutex_t* simulation_state_mutex; // protects terminate_now
+    pthread_mutex_t* simulation_state_mutex; // protects g_terminate_now
     pthread_cond_t* refill_needed_cv;
     struct LinkedList* paper_refill_queue;
     struct SimulationParameters* params;

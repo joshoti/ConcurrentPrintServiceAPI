@@ -11,7 +11,7 @@
 #include "logger.h"
 #include "simulation_stats.h"
 
-extern int terminate_now;
+extern int g_terminate_now;
 extern int g_debug;
 
 int init_job(Job* job, int job_id, int inter_arrival_time_us, int papers_required) {
@@ -109,7 +109,7 @@ void* job_receiver_thread_func(void* arg) {
         
         // Check for termination signal
         pthread_mutex_lock(simulation_state_mutex);
-        if (terminate_now) {
+        if (g_terminate_now) {
             *all_jobs_arrived = 1;
             pthread_mutex_unlock(simulation_state_mutex);
             free(job);

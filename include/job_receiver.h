@@ -56,7 +56,7 @@ void debug_job(Job* job);
 typedef struct JobThreadArgs {
     pthread_mutex_t* job_queue_mutex;
     pthread_mutex_t* stats_mutex;
-    pthread_mutex_t* simulation_state_mutex; // protects all_jobs_arrived and terminate_now
+    pthread_mutex_t* simulation_state_mutex; // protects all_jobs_arrived and g_terminate_now
     pthread_cond_t* job_queue_not_empty_cv;
     struct LinkedList* job_queue;
     struct SimulationParameters* simulation_params;

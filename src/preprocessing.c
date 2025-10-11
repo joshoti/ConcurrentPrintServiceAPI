@@ -7,7 +7,7 @@
 #include "preprocessing.h"
 
 int g_debug = 0;
-int terminate_now = 0;
+int g_terminate_now = 0;
 
 void usage() {
     fprintf(stderr, "usage: ./cli [-debug] [-num num_jobs] [-q queue_capacity] [-p_cap printer_paper_capacity] [-arr arrival_rate] [-s service_rate] [-ref refill_rate] [-papers_lower papers_required_lower_bound] [-papers_upper papers_required_upper_bound]\n");

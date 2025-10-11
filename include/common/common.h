@@ -2,7 +2,7 @@
 #define COMMON_H
 
 extern int g_debug;
-extern int terminate_now;
+extern int g_terminate_now;
 
 #ifndef TRUE
 #define FALSE 0

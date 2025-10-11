@@ -21,7 +21,7 @@ typedef struct PrinterThreadArgs {
     pthread_mutex_t* printer_mutex;
     pthread_mutex_t* job_queue_mutex;
     pthread_mutex_t* stats_mutex;
-    pthread_mutex_t* simulation_state_mutex; // protects terminate_now
+    pthread_mutex_t* simulation_state_mutex; // protects g_terminate_now
     pthread_cond_t* job_queue_not_empty_cv;
     pthread_cond_t* printer_paper_empty_cv;
     struct LinkedList* job_queue;
