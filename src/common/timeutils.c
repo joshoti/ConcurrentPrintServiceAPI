@@ -2,6 +2,8 @@
 #include <math.h>
 #include "timeutils.h"
 
+const char time_format[] = "%08d.%03dms: ";
+
 unsigned long get_time_in_us() {
     struct timeval now;
     (void) gettimeofday(&now, NULL);
@@ -9,9 +11,6 @@ unsigned long get_time_in_us() {
     return time_us;
 }
 
-/**
- * Given `current_time_us` = 9253307, sets `*time_ms` to 9253 and `*time_us` to 307.
- */
 void time_in_us_to_ms(unsigned long current_time_us, int* time_ms, int* time_us) {
     *time_ms = (int)(current_time_us / 1000);
     *time_us = (int)(current_time_us % 1000);

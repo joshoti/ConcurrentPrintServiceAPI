@@ -60,7 +60,7 @@ void log_simulation_end(SimulationStatistics* stats) {
     log_time(reference_end_time_us, reference_time_us);
     stats->simulation_duration_us = reference_end_time_us - reference_time_us;
     printf("simulation ends, duration = %d.%03dms\n",
-        stats->simulation_duration_us / 1000, stats->simulation_duration_us % 1000);
+        (int)(stats->simulation_duration_us / 1000), (int)(stats->simulation_duration_us % 1000));
     funlockfile(stdout);
 }
 
@@ -212,6 +212,6 @@ void log_ctrl_c_pressed(SimulationStatistics* stats) {
     log_time(reference_end_time_us, reference_time_us);
     stats->simulation_duration_us = reference_end_time_us - reference_time_us;
     printf("simulation stopped, duration = %d.%03dms\n",
-        stats->simulation_duration_us / 1000, stats->simulation_duration_us % 1000);
+        (int)(stats->simulation_duration_us / 1000), (int)(stats->simulation_duration_us % 1000));
     funlockfile(stdout);
 }
