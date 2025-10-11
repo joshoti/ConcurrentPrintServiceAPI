@@ -250,27 +250,31 @@ void publish_paper_empty(Printer* printer, unsigned long current_time_us,
     }
 }
 
-void publish_paper_refill_start(Printer* printer, unsigned long current_time_us,
-    struct mg_connection* ws_conn)
+void publish_paper_refill_start(Printer* printer, int papers_needed,
+    int time_to_refill_ms, unsigned long current_time_us, struct mg_connection* ws_conn)
 {
     char time_buf[64];
     char buf[1024];
     write_time_to_buffer(current_time_us, reference_time_us, time_buf);
-    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d starts refilling paper\"}",
-        time_buf, printer->id);
+    int time_ms = time_to_refill_ms / 1000;
+    int time_us = time_to_refill_ms % 1000;
+    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d starts refilling %d papers, estimated time = %d.%03dms\"}",
+        time_buf, printer->id, papers_needed, time_ms, time_us);
     if (ws_conn) {
         mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
     }
 }
 
-void publish_paper_refill_end(Printer* printer, unsigned long current_time_us,
-    struct mg_connection* ws_conn)
+void publish_paper_refill_end(Printer* printer, int refill_duration_ms,
+    unsigned long current_time_us, struct mg_connection* ws_conn)
 {
     char time_buf[64];
     char buf[1024];
     write_time_to_buffer(current_time_us, reference_time_us, time_buf);
-    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d finishes refilling paper\"}",
-        time_buf, printer->id);
+    int time_ms = refill_duration_ms / 1000;
+    int time_us = refill_duration_ms % 1000;
+    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d finishes refilling, actual time = %d.%03dms\"}",
+        time_buf, printer->id, time_ms, time_us);
     if (ws_conn) {
         mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
     }

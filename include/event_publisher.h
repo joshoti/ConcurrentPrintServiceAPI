@@ -115,20 +115,23 @@ void publish_paper_empty(Printer* printer, unsigned long current_time_us,
  * @brief Publishes an event when a printer starts refilling paper.
  *
  * @param printer The printer that is starting to refill paper.
+ * @param papers_needed The number of papers needed to refill the printer to full capacity.
+ * @param time_to_refill_ms The time in milliseconds it will take to refill the paper
  * @param current_time_us The current simulation time in microseconds.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_paper_refill_start(Printer* printer, unsigned long current_time_us,
-    struct mg_connection* ws_conn);
+void publish_paper_refill_start(Printer* printer, int papers_needed,
+    int time_to_refill_ms, unsigned long current_time_us, struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a printer finishes refilling paper.
  *
  * @param printer The printer that has finished refilling paper.
+ * @param refill_duration_ms The time in milliseconds it took to refill the paper.
  * @param current_time_us The current simulation time in microseconds.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_paper_refill_end(Printer* printer, unsigned long current_time_us,
-    struct mg_connection* ws_conn);
+void publish_paper_refill_end(Printer* printer, int refill_duration_ms,
+    unsigned long current_time_us, struct mg_connection* ws_conn);
 
 /**
  * @brief Publishes an event when the simulation is stopped.
