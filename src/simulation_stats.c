@@ -186,7 +186,9 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
         "\"utilization_p2\":%.6g,"
         "\"job_arrival_rate_per_sec\":%.6g,"
         "\"job_drop_probability\":%.6g,"
-        "\"paper_refill_events\":%.0f"
+        "\"paper_refill_events\":%.0f,"
+        "\"total_refill_service_time_us\":%lu,"
+        "\"papers_refilled\":%d"
         "}}",
         simulation_time_sec,
         stats->total_jobs_arrived,
@@ -207,7 +209,9 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
         utilization_p2,
         job_arrival_rate,
         job_drop_probability,
-        stats->paper_refill_events
+        stats->paper_refill_events,
+        stats->total_refill_service_time_us,
+        stats->papers_refilled
     );
 
     return len;
@@ -265,6 +269,8 @@ void log_statistics(SimulationStatistics* stats) {
     printf("\n");
     printf("--- Paper Management ---\n");
     printf("Paper Refill Events:               %.0f\n", stats->paper_refill_events);
+    printf("Total Refill Service Time:         %lu\n", stats->total_refill_service_time_us);
+    printf("Papers Refilled:                   %d\n", stats->papers_refilled);
     printf("=========================================================\n");
     
     funlockfile(stdout);
@@ -298,6 +304,7 @@ void debug_statistics(const SimulationStatistics* stats) {
     printf("printer2_paper_empty_time_us: %lu\n", stats->printer2_paper_empty_time_us);
     printf("paper_refill_events: %.0f\n", stats->paper_refill_events);
     printf("total_refill_service_time_us: %lu\n", stats->total_refill_service_time_us);
+    printf("papers_refilled: %d\n", stats->papers_refilled);
     printf("==============================\n");
     funlockfile(stdout);
 }

@@ -27,6 +27,7 @@ int test_create_simulation_stats(SimulationStatistics* stats) {
     stats->printer2_paper_empty_time_us = 50000; // paper empty time for printer 2
     stats->paper_refill_events = 2;
     stats->total_refill_service_time_us = 20000; // total refill service time
+    stats->papers_refilled = 15;
     
     // Test debugging statistics (output raw values)
     debug_statistics(stats);
