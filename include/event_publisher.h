@@ -138,4 +138,12 @@ void publish_paper_refill_end(Printer* printer, unsigned long current_time_us,
  */
 void publish_simulation_stopped(SimulationStatistics* stats, struct mg_connection* ws_conn);
 
+/**
+ * @brief Calculates and publishes all relevant simulation statistics via WebSocket.
+ *
+ * @param stats A simulation statistics struct.
+ * @param ws_conn The WebSocket connection to publish the statistics to.
+ */
+void publish_statistics(SimulationStatistics* stats, struct mg_connection* ws_conn);
+
 #endif // EVENT_PUBLISHER_H

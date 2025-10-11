@@ -289,3 +289,14 @@ void publish_simulation_stopped(SimulationStatistics* stats, struct mg_connectio
         mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
     }
 }
+
+void publish_statistics(SimulationStatistics* stats, struct mg_connection* ws_conn) {
+    if (stats == NULL) return;
+
+    char buf[4096];
+    if (write_statistics_to_buffer(stats, buf, sizeof(buf)) > 0) {
+        if (ws_conn) {
+            mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
+        }
+    }
+}

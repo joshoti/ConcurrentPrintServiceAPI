@@ -37,7 +37,17 @@ typedef struct {
 } SimulationStatistics;
 
 /**
- * @brief Calculates and prints all relevant simulation statistics.
+ * @brief Calculates all relevant simulation statistics and formats them as a JSON string to the provided buffer.
+ *
+ * @param stats A simulation statistics struct.
+ * @param buf A character buffer to hold the JSON statistics message.
+ * @param buf_size The size of the provided buffer.
+ * @return The number of bytes written to the buffer, or -1 on error.
+ */
+int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_size);
+
+/**
+ * @brief Calculates and logs all relevant simulation statistics to stdout.
  *
  * @param stats A simulation statistics struct.
  */
