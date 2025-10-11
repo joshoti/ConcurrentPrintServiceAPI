@@ -14,21 +14,21 @@ struct TimedQueue;
  * @param params The simulation parameters to publish.
  * @param ws_conn The WebSocket connection to publish the parameters to.
  */
-void publish_simulation_parameters(const SimulationParameters* params, struct mg_connection* ws_conn);
+void publish_simulation_parameters(const struct SimulationParameters* params, struct mg_connection* ws_conn);
 /**
  * @brief Publishes the start of the simulation.
  * 
  * @param stats The simulation statistics to update.
  * @param ws_conn The WebSocket connection to publish the start event to.
  */
-void publish_simulation_start(SimulationStatistics* stats, struct mg_connection* ws_conn);
+void publish_simulation_start(struct SimulationStatistics* stats, struct mg_connection* ws_conn);
 /**
  * @brief Publishes the end of the simulation.
  * 
  * @param stats The simulation statistics to update.
  * @param ws_conn The WebSocket connection to publish the end event to.
  */
-void publish_simulation_end(SimulationStatistics* stats, struct mg_connection* ws_conn);
+void publish_simulation_end(struct SimulationStatistics* stats, struct mg_connection* ws_conn);
 
 /**
  * @brief Publishes an event when a new job is created in the system.
@@ -38,8 +38,8 @@ void publish_simulation_end(SimulationStatistics* stats, struct mg_connection* w
  * @param stats The simulation statistics to update.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_system_arrival(Job* job,
-    unsigned long previous_job_arrival_time_us, SimulationStatistics* stats,
+void publish_system_arrival(struct Job* job,
+    unsigned long previous_job_arrival_time_us, struct SimulationStatistics* stats,
     struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a job is dropped from the system.
@@ -49,8 +49,8 @@ void publish_system_arrival(Job* job,
  * @param stats The simulation statistics to update.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_dropped_job(Job* job,
-    unsigned long previous_job_arrival_time_us, SimulationStatistics* stats,
+void publish_dropped_job(struct Job* job,
+    unsigned long previous_job_arrival_time_us, struct SimulationStatistics* stats,
     struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a job is removed from the system without being processed.
@@ -58,7 +58,7 @@ void publish_dropped_job(Job* job,
  * @param job The job that has been removed.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_removed_job(Job* job, struct mg_connection* ws_conn);
+void publish_removed_job(struct Job* job, struct mg_connection* ws_conn);
 
 /**
  * @brief Publishes an event when a job arrives at the queue.
@@ -87,7 +87,7 @@ void publish_queue_departure(const struct Job* job, struct SimulationStatistics*
  * @param printer The printer that the job has arrived at.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_printer_arrival(const Job* job, const Printer* printer,
+void publish_printer_arrival(const struct Job* job, const struct Printer* printer,
     struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a job departs from a printer after processing.
@@ -96,8 +96,8 @@ void publish_printer_arrival(const Job* job, const Printer* printer,
  * @param stats The simulation statistics to update.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_system_departure(const Job* job, const Printer* printer,
-    SimulationStatistics* stats, struct mg_connection* ws_conn);
+void publish_system_departure(const struct Job* job, const struct Printer* printer,
+    struct SimulationStatistics* stats, struct mg_connection* ws_conn);
 
 /**
  * @brief Publishes an event when a printer runs out of paper.
@@ -106,7 +106,7 @@ void publish_system_departure(const Job* job, const Printer* printer,
  * @param current_time_us The current simulation time in microseconds.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_paper_empty(Printer* printer, unsigned long current_time_us,
+void publish_paper_empty(struct Printer* printer, unsigned long current_time_us,
     struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a printer starts refilling paper.
@@ -117,7 +117,7 @@ void publish_paper_empty(Printer* printer, unsigned long current_time_us,
  * @param current_time_us The current simulation time in microseconds.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_paper_refill_start(Printer* printer, int papers_needed,
+void publish_paper_refill_start(struct Printer* printer, int papers_needed,
     int time_to_refill_ms, unsigned long current_time_us, struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a printer finishes refilling paper.
@@ -127,7 +127,7 @@ void publish_paper_refill_start(Printer* printer, int papers_needed,
  * @param current_time_us The current simulation time in microseconds.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_paper_refill_end(Printer* printer, int refill_duration_ms,
+void publish_paper_refill_end(struct Printer* printer, int refill_duration_ms,
     unsigned long current_time_us, struct mg_connection* ws_conn);
 
 /**
@@ -136,7 +136,7 @@ void publish_paper_refill_end(Printer* printer, int refill_duration_ms,
  * @param stats The simulation statistics to update.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_simulation_stopped(SimulationStatistics* stats, struct mg_connection* ws_conn);
+void publish_simulation_stopped(struct SimulationStatistics* stats, struct mg_connection* ws_conn);
 
 /**
  * @brief Calculates and publishes all relevant simulation statistics via WebSocket.
@@ -144,6 +144,6 @@ void publish_simulation_stopped(SimulationStatistics* stats, struct mg_connectio
  * @param stats A simulation statistics struct.
  * @param ws_conn The WebSocket connection to publish the statistics to.
  */
-void publish_statistics(SimulationStatistics* stats, struct mg_connection* ws_conn);
+void publish_statistics(struct SimulationStatistics* stats, struct mg_connection* ws_conn);
 
 #endif // EVENT_PUBLISHER_H
