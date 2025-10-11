@@ -69,7 +69,7 @@ typedef struct JobThreadArgs {
  * @brief Function executed by the job receiver thread.
  *
  * @param arg Pointer to JobThreadArgs struct.
- * @return Always returns NULL.
+ * @return NULL
  */
 void* job_receiver_thread_func(void* arg);
 
