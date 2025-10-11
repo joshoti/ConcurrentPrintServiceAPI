@@ -16,8 +16,10 @@ void log_simulation_parameters(const SimulationParameters* params);
 
 /**
  * @brief Logs the start of the simulation.
+ * 
+ * @param stats The simulation statistics to update.
  */
-void log_simulation_start();
+void log_simulation_start(SimulationStatistics* stats);
 
 /**
  * @brief Logs the end of the simulation.

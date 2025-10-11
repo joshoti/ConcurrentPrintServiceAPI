@@ -46,8 +46,9 @@ void publish_simulation_parameters(const SimulationParameters* params, struct mg
     }
 }
 
-void publish_simulation_start(struct mg_connection* ws_conn) {
+void publish_simulation_start(SimulationStatistics* stats, struct mg_connection* ws_conn) {
     reference_time_us = get_time_in_us();
+    stats->simulation_start_time_us = reference_time_us;
     char time_buf[64];
     char buf[1024];
 

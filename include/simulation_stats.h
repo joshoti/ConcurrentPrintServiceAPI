@@ -3,6 +3,7 @@
 
 typedef struct {
     // --- General Simulation Metrics ---
+    unsigned long simulation_start_time_us;  // Start time of the simulation
     unsigned long simulation_duration_us; // Total simulation time in microseconds
 
     // --- Job Arrival & Flow Metrics ---

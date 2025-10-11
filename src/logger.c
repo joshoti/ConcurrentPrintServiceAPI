@@ -45,8 +45,9 @@ void log_simulation_parameters(const SimulationParameters* params) {
     funlockfile(stdout);
 }
 
-void log_simulation_start() {
+void log_simulation_start(SimulationStatistics* stats) {
     reference_time_us = get_time_in_us();
+    stats->simulation_start_time_us = reference_time_us;
     flockfile(stdout);
     log_time(reference_time_us, reference_time_us);
     printf("simulation begins\n");
@@ -83,7 +84,7 @@ static void job_arrival_helper(int job_id, int papers_required,
 
     int inter_arrival_time_us = current_job_arrival_time_us - previous_job_arrival_time_us;
     stats->total_inter_arrival_time_us += inter_arrival_time_us; // stats: avg job inter-arrival time
-    stats->total_jobs_arrived += 1; // stats: total jobs arrived
+    stats->total_jobs_arrived ++; // stats: total jobs arrived
     int time_in_ms = inter_arrival_time_us / 1000;
     int time_in_us = inter_arrival_time_us % 1000;
     printf("job%d arrives, needs %d paper%s, inter-arrival time = %d.%03dms%s\n",

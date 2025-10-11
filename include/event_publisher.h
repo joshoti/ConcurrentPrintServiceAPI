@@ -18,9 +18,10 @@ void publish_simulation_parameters(const SimulationParameters* params, struct mg
 /**
  * @brief Publishes the start of the simulation.
  * 
+ * @param stats The simulation statistics to update.
  * @param ws_conn The WebSocket connection to publish the start event to.
  */
-void publish_simulation_start(struct mg_connection* ws_conn);
+void publish_simulation_start(SimulationStatistics* stats, struct mg_connection* ws_conn);
 /**
  * @brief Publishes the end of the simulation.
  * 
