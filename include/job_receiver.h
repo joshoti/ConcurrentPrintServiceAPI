@@ -1,14 +1,22 @@
 #ifndef JOB_RECEIVER_H
 #define JOB_RECEIVER_H
 
+typedef struct pthread_mutex_t;
+typedef struct pthread_cond_t;
+typedef struct LinkedList;
+typedef struct SimulationParameters;
+typedef struct SimulationStatistics;
+
 // --- Job structure ---
 typedef struct {
     // --- Job Attributes ---
     int id;
-    int inter_arrival_time_us; // time between this packet and the previous packet
+    int inter_arrival_time_us; // time between this job and the previous job
     int papers_required; // number of papers required by the job
-    int service_time_requested_ms; // time required to service the job
     
+    // --- Service Attributes ---
+    int service_time_requested_ms; // time required to service the job depending on papers required
+
     // --- Timestamps for tracking job lifecycle ---
     unsigned long system_arrival_time_us; // time job arrived to the system
     unsigned long queue_arrival_time_us; // time job entered service queue
@@ -25,29 +33,16 @@ typedef struct {
  * @param job_id Unique identifier for the job.
  * @param inter_arrival_time_us Time between this job and the previous job in microseconds.
  * @param papers_required Number of papers required by the job.
- * @param service_time_requested_ms Time required to service the job in milliseconds.
  * @return 1 on success, 0 on failure (e.g., invalid parameters).
  */
-int init_job(Job* job, int job_id, int inter_arrival_time_us,
-    int papers_required, int service_time_requested_ms);
+int init_job(Job* job, int job_id, int inter_arrival_time_us, int papers_required);
 
-/**
- * @brief Retrieves job information from random generator or the input file.
- * @param inter_arrival_time_us Pointer to store the inter-arrival time.
- * @param papers_required Pointer to store the number of papers required.
- * @param service_time_requested_ms Pointer to store the service time requested.
- * @param line_num The line number in the input file to read the job from.
- */
-void get_job_info(int* inter_arrival_time_us, int* papers_required,
-    int* service_time_requested_ms, int line_num);
 /**
  * @brief Simulates dropping a job from the system. Updates statistics accordingly.
  * @param job Pointer to the Job struct to drop.
  * @param previous_job_arrival_time_us Arrival time of the previous job in microseconds.
- * @param total_jobs_dropped Pointer to the counter for total jobs dropped.
  */
-void drop_job_from_system(Job* job,
-    unsigned long previous_job_arrival_time_us, double* total_jobs_dropped);
+void drop_job_from_system(Job* job, unsigned long previous_job_arrival_time_us);
 /**
  * @brief Prints job details for debugging purposes.
  * @param job Pointer to the Job struct to print.
@@ -59,13 +54,21 @@ void debug_job(Job* job);
  * @brief Arguments for the job receiver thread.
  */
 typedef struct {
-} JobArguments;
+    pthread_mutex_t* job_queue_mutex;
+    pthread_mutex_t* stats_mutex;
+    pthread_mutex_t* simulation_state_mutex; // protects all_jobs_arrived and terminate_now
+    pthread_cond_t* job_queue_not_empty_cv;
+    LinkedList* job_queue;
+    SimulationParameters* simulation_params;
+    SimulationStatistics* stats;
+    int* all_jobs_arrived;
+} JobThreadArgs;
 
 // --- Thread function ---
 /**
  * @brief Function executed by the job receiver thread.
  *
- * @param arg Pointer to JobArguments struct.
+ * @param arg Pointer to JobThreadArgs struct.
  * @return Always returns NULL.
  */
 void* job_receiver_thread_func(void* arg);
