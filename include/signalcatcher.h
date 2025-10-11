@@ -18,7 +18,7 @@ void empty_queue_if_terminating(struct LinkedList* queue, struct SimulationStati
  * @brief Arguments for the signal catching thread.
  */
 typedef struct SignalCatchingThreadArgs {
-    sigset_t signal_set; // Set of signals to wait for
+    sigset_t* signal_set; // Set of signals to wait for
     pthread_mutex_t* job_queue_mutex; // Mutex to protect shared state
     pthread_mutex_t* simulation_state_mutex; // Mutex to protect shared state
     pthread_mutex_t* stats_mutex;

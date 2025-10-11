@@ -29,12 +29,12 @@ void empty_queue_if_terminating(LinkedList* queue, SimulationStatistics* stats) 
 void* sig_int_catching_thread_func(void* arg) {
     int sig;
     SignalCatchingThreadArgs* args = (SignalCatchingThreadArgs*)arg;
-    sigwait(&args->signal_set, &sig);
+    sigwait(args->signal_set, &sig);
 
-    pthread_mutex_lock(&args->simulation_state_mutex);
+    pthread_mutex_lock(args->simulation_state_mutex);
     g_terminate_now = 1;
     *args->all_jobs_arrived = 1;
-    pthread_mutex_unlock(&args->simulation_state_mutex);
+    pthread_mutex_unlock(args->simulation_state_mutex);
 
     pthread_mutex_lock(args->stats_mutex);
     log_ctrl_c_pressed(args->stats);
