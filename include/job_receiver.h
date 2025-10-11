@@ -3,7 +3,7 @@
 
 # include <pthread.h>
 
-struct LinkedList;
+struct TimedQueue;
 struct SimulationParameters;
 struct SimulationStatistics;
 
@@ -38,11 +38,12 @@ typedef struct Job {
 int init_job(Job* job, int job_id, int inter_arrival_time_us, int papers_required);
 
 /**
- * @brief Simulates dropping a job from the system. Updates statistics accordingly.
+ * @brief Drop a job from the system. Updates statistics accordingly. Free the job memory after dropping.
  * @param job Pointer to the Job struct to drop.
  * @param previous_job_arrival_time_us Arrival time of the previous job in microseconds.
+ * @param stats Pointer to the SimulationStatistics struct to update.
  */
-void drop_job_from_system(Job* job, unsigned long previous_job_arrival_time_us);
+void drop_job_from_system(Job* job, unsigned long previous_job_arrival_time_us, struct SimulationStatistics* stats);
 /**
  * @brief Prints job details for debugging purposes.
  * @param job Pointer to the Job struct to print.
@@ -58,7 +59,7 @@ typedef struct JobThreadArgs {
     pthread_mutex_t* stats_mutex;
     pthread_mutex_t* simulation_state_mutex; // protects all_jobs_arrived and g_terminate_now
     pthread_cond_t* job_queue_not_empty_cv;
-    struct LinkedList* job_queue;
+    struct TimedQueue* job_queue;
     struct SimulationParameters* simulation_params;
     struct SimulationStatistics* stats;
     int* all_jobs_arrived;

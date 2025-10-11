@@ -7,15 +7,16 @@
 #include "timeutils.h"
 #include "job_receiver.h"
 #include "linked_list.h"
+#include "timed_queue.h"
 #include "signalcatcher.h"
 #include "simulation_stats.h"
 
 extern int g_debug;
 extern int g_terminate_now;
 
-void empty_queue_if_terminating(LinkedList* queue, SimulationStatistics* stats) {
-    while (!list_is_empty(queue)) {
-        ListNode* curr = list_pop(queue);
+void empty_queue_if_terminating(TimedQueue* queue, SimulationStatistics* stats) {
+    while (!timed_queue_is_empty(queue)) {
+        ListNode* curr = timed_queue_dequeue_front(queue);
         Job* job = (Job*)curr->data;
         job->queue_departure_time_us = get_time_in_us();
         log_removed_job(job);

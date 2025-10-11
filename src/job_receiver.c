@@ -7,6 +7,7 @@
 #include "job_receiver.h"
 #include "preprocessing.h"
 #include "linked_list.h"
+#include "timed_queue.h"
 #include "timeutils.h"
 #include "logger.h"
 #include "simulation_stats.h"
@@ -75,7 +76,7 @@ void* job_receiver_thread_func(void* arg) {
     pthread_mutex_t* stats_mutex = args->stats_mutex;
     pthread_mutex_t* simulation_state_mutex = args->simulation_state_mutex;
     pthread_cond_t* job_queue_not_empty_cv = args->job_queue_not_empty_cv;
-    LinkedList* job_queue = args->job_queue;
+    TimedQueue* job_queue = args->job_queue;
     SimulationParameters* params = args->simulation_params;
     SimulationStatistics* stats = args->stats;
     int* all_jobs_arrived = args->all_jobs_arrived;
@@ -123,7 +124,7 @@ void* job_receiver_thread_func(void* arg) {
         // Check if job should be dropped (e.g., if queue is full)
         pthread_mutex_lock(job_queue_mutex);
         
-        int queue_length = list_length(job_queue);
+        int queue_length = timed_queue_length(job_queue);
         if (queue_length >= params->queue_capacity) {
             // Drop the job
             pthread_mutex_unlock(job_queue_mutex);
@@ -139,11 +140,13 @@ void* job_receiver_thread_func(void* arg) {
         
         // Add job to queue
         job->queue_arrival_time_us = get_time_in_us();
-        list_append(job_queue, job);
+        timed_queue_enqueue(job_queue, job);
         
         // Update statistics
         pthread_mutex_lock(stats_mutex);
-        log_system_arrival(job, previous_job_arrival_time_us, stats);
+        stats->max_job_queue_length = 
+            (queue_length > stats->max_job_queue_length) ? (queue_length) : stats->max_job_queue_length;
+        log_queue_arrival(job, stats, job_queue);
         pthread_mutex_unlock(stats_mutex);
         
         previous_job_arrival_time_us = job->system_arrival_time_us;

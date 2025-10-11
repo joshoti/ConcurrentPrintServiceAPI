@@ -1,17 +1,20 @@
 #ifndef SIGNAL_CATCHER_H
 #define SIGNAL_CATCHER_H
 
-struct LinkedList;
+#include <pthread.h>
+#include <signal.h>
+
+struct TimedQueue;
 struct SimulationStatistics;
 
 // --- Utility functions ---
 /**
  * @brief Empties the given queue of all jobs, logging each removal and updating statistics.
  * 
- * @param queue Pointer to the LinkedList representing the job queue to be emptied.
+ * @param queue Pointer to the TimedQueue representing the job queue to be emptied.
  * @param stats Pointer to the SimulationStatistics struct to update statistics.
  */
-void empty_queue_if_terminating(struct LinkedList* queue, struct SimulationStatistics* stats);
+void empty_queue_if_terminating(struct TimedQueue* queue, struct SimulationStatistics* stats);
 
 // --- Signal Catching Thread Arguments ---
 /**
@@ -23,7 +26,7 @@ typedef struct SignalCatchingThreadArgs {
     pthread_mutex_t* simulation_state_mutex; // Mutex to protect shared state
     pthread_mutex_t* stats_mutex;
     pthread_cond_t* job_queue_not_empty_cv; // Condition variable to signal other threads
-    struct LinkedList* job_queue; // Pointer to the job queue to be emptied
+    struct TimedQueue* job_queue; // Pointer to the job queue to be emptied
     struct SimulationStatistics* stats; // Simulation statistics to update
     pthread_t job_receiver_thread; // Thread ID of the job receiver thread to cancel
     int* all_jobs_arrived; // Flag indicating if all jobs have arrived

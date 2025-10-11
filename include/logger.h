@@ -5,7 +5,7 @@ struct Job;
 struct Printer;
 struct SimulationParameters;
 struct SimulationStatistics;
-struct LinkedList;
+struct TimedQueue;
 
 /**
  * @brief Logs the simulation parameters at the start of the simulation.
@@ -58,22 +58,20 @@ void log_removed_job(struct Job* job);
 /**
  * @brief Logs an event when a job arrives at the queue.
  * @param job The job that has arrived at the queue.
- * @param last_interaction_time_us A pointer to the queue's last interaction time in microseconds.
  * @param stats The simulation statistics to update.
  * @param job_queue The job queue to check the length of.
  */
-void log_queue_arrival(const struct Job* job, unsigned long* last_interaction_time_us,
-    struct SimulationStatistics* stats, struct LinkedList* job_queue);
+void log_queue_arrival(const struct Job* job, struct SimulationStatistics* stats,
+    struct TimedQueue* job_queue);
 /**
  * @brief Logs an event when a job departs from the queue.
  *
  * @param job The job that has departed from the queue.
- * @param last_interaction_time_us A pointer to the queue's last interaction time in microseconds.
  * @param stats The simulation statistics to update.
  * @param job_queue The job queue to check the length of.
  */
-void log_queue_departure(const struct Job* job, unsigned long* last_interaction_time_us,
-    struct SimulationStatistics* stats, struct LinkedList* job_queue);
+void log_queue_departure(const struct Job* job, struct SimulationStatistics* stats,
+    struct TimedQueue* job_queue);
 
 /**
  * @brief Logs an event when a job arrives at a printer for processing.

@@ -8,6 +8,7 @@
 #include "simulation_stats.h"
 #include "job_receiver.h"
 #include "linked_list.h"
+#include "timed_queue.h"
 #include "printer.h"
 
 static unsigned long reference_time_us = 0;
@@ -142,41 +143,34 @@ void publish_removed_job(Job* job, struct mg_connection* ws_conn)
     }
 }
 
-// TODO: (DONE) Maintain last interaction time for queue length stats
-//      This should be updated on both arrival and departure
-//      of jobs to/from the queue
-// TODO: Before calling this, update max_job_queue_length if needed
-//      or pass stats as a parameter to update it here
-void publish_queue_arrival(const Job* job,
-    unsigned long* last_interaction_time_us, SimulationStatistics* stats,
-    LinkedList* job_queue, struct mg_connection* ws_conn)
+void publish_queue_arrival(const Job* job, SimulationStatistics* stats,
+    TimedQueue* job_queue, struct mg_connection* ws_conn)
 {
     stats->area_num_in_job_queue_us +=
-        (job->queue_arrival_time_us - *last_interaction_time_us) * // duration of previous state
-        (list_length(job_queue) - 1); // -1 for the job that just entered the queue
+        (job->queue_arrival_time_us - job_queue->last_interaction_time_us) * // duration of previous state
+        (timed_queue_length(job_queue) - 1); // -1 for the job that just entered the queue
     // stats: avg job queue length
-    *last_interaction_time_us = job->queue_arrival_time_us;
+    job_queue->last_interaction_time_us = job->queue_arrival_time_us;
 
     char time_buf[64];
     char buf[1024];
     write_time_to_buffer(job->queue_arrival_time_us, reference_time_us, time_buf);
 
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s job%d enters queue, queue length = %d\"}",
-        time_buf, job->id, list_length(job_queue));
+        time_buf, job->id, timed_queue_length(job_queue));
     if (ws_conn) {
         mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
     }
 }
 
-void publish_queue_departure(const Job* job,
-    unsigned long* last_interaction_time_us, SimulationStatistics* stats,
-    LinkedList* job_queue, struct mg_connection* ws_conn)
+void publish_queue_departure(const Job* job, SimulationStatistics* stats,
+    TimedQueue* job_queue, struct mg_connection* ws_conn)
 {
     stats->area_num_in_job_queue_us +=
-        (job->queue_departure_time_us - *last_interaction_time_us) * // duration of previous state
-        (list_length(job_queue) + 1); // +1 for the job that just left the queue
+        (job->queue_departure_time_us - job_queue->last_interaction_time_us) * // duration of previous state
+        (timed_queue_length(job_queue) + 1); // +1 for the job that just left the queue
     // stats: avg job queue length
-    *last_interaction_time_us = job->queue_departure_time_us;
+    job_queue->last_interaction_time_us = job->queue_departure_time_us;
 
     char time_buf[64];
     char buf[1024];
@@ -186,7 +180,7 @@ void publish_queue_departure(const Job* job,
     int time_ms = queue_duration / 1000;
     int time_us = queue_duration % 1000;
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s job%d leaves queue, time in queue = %d.%03dms, queue_length = %d\"}",
-        time_buf, job->id, time_ms, time_us, list_length(job_queue));
+        time_buf, job->id, time_ms, time_us, timed_queue_length(job_queue));
     if (ws_conn) {
         mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
     }

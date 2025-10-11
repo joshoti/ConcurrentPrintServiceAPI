@@ -1,12 +1,12 @@
 #ifndef EVENT_PUBLISHER_H
 #define EVENT_PUBLISHER_H
 
-typedef struct Job;
-typedef struct Printer;
-typedef struct SimulationParameters;
-typedef struct mg_connection;
-typedef struct SimulationStatistics;
-typedef struct LinkedList;
+struct Job;
+struct Printer;
+struct SimulationParameters;
+struct mg_connection;
+struct SimulationStatistics;
+struct TimedQueue;
 
 /**
  * @brief Publishes the simulation parameters.
@@ -63,25 +63,22 @@ void publish_removed_job(Job* job, struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a job arrives at the queue.
  * @param job The job that has arrived at the queue.
- * @param last_interaction_time_us A pointer to the queue's last interaction time in microseconds.
  * @param stats The simulation statistics to update.
  * @param job_queue The job queue to check the length of.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_queue_arrival(const Job* job, unsigned long* last_interaction_time_us,
-    SimulationStatistics* stats, LinkedList* job_queue, struct mg_connection* ws_conn);
+void publish_queue_arrival(const struct Job* job, struct SimulationStatistics* stats,
+    struct TimedQueue* job_queue, struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a job departs from the queue.
  *
  * @param job The job that has departed from the queue.
- * @param last_interaction_time_us A pointer to the queue's last interaction time in microseconds.
  * @param stats The simulation statistics to update.
  * @param job_queue The job queue to check the length of.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_queue_departure(const Job* job, unsigned long* last_interaction_time_us,
-    SimulationStatistics* stats, LinkedList* job_queue,
-    struct mg_connection* ws_conn);
+void publish_queue_departure(const struct Job* job, struct SimulationStatistics* stats,
+    struct TimedQueue* job_queue, struct mg_connection* ws_conn);
 
 /**
  * @brief Publishes an event when a job arrives at a printer for processing.
