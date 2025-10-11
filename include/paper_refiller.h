@@ -20,7 +20,6 @@ void debug_refiller(int papers_supplied);
  * @brief Arguments for the paper refiller thread.
  */
 typedef struct PaperRefillerThreadArgs {
-    // TODO: confirm
     pthread_mutex_t* paper_refill_queue_mutex;
     pthread_mutex_t* stats_mutex;
     pthread_mutex_t* simulation_state_mutex; // protects g_terminate_now
@@ -28,6 +27,7 @@ typedef struct PaperRefillerThreadArgs {
     struct LinkedList* paper_refill_queue;
     struct SimulationParameters* params;
     struct SimulationStatistics* stats;
+    int* all_jobs_served;
 } PaperRefillerThreadArgs;
 
 // --- Thread function ---
