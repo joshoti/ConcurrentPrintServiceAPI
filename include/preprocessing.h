@@ -7,7 +7,7 @@
  *        and shared variables for command line argument processing and thread management.
  */
 
-typedef struct {
+typedef struct SimulationParameters {
     double job_arrival_time_us;
     int papers_required_lower_bound;
     int papers_required_upper_bound;

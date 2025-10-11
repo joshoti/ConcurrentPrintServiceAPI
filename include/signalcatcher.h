@@ -1,8 +1,8 @@
 #ifndef SIGNAL_CATCHER_H
 #define SIGNAL_CATCHER_H
 
-typedef struct LinkedList;
-typedef struct SimulationStatistics;
+struct LinkedList;
+struct SimulationStatistics;
 
 // --- Utility functions ---
 /**

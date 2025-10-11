@@ -1,7 +1,7 @@
 #ifndef SIMULATION_STATS_H
 #define SIMULATION_STATS_H
 
-typedef struct {
+typedef struct SimulationStatistics {
     // --- General Simulation Metrics ---
     unsigned long simulation_start_time_us;  // Start time of the simulation
     unsigned long simulation_duration_us; // Total simulation time in microseconds
@@ -51,7 +51,7 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
  *
  * @param stats A simulation statistics struct.
  */
-void publish_statistics(SimulationStatistics* stats);
+void log_statistics(SimulationStatistics* stats);
 
 /**
  * @brief Prints all raw statistics for debugging purposes.

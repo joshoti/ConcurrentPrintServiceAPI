@@ -1,14 +1,14 @@
 #ifndef JOB_RECEIVER_H
 #define JOB_RECEIVER_H
 
-typedef struct pthread_mutex_t;
-typedef struct pthread_cond_t;
-typedef struct LinkedList;
-typedef struct SimulationParameters;
-typedef struct SimulationStatistics;
+# include <pthread.h>
+
+struct LinkedList;
+struct SimulationParameters;
+struct SimulationStatistics;
 
 // --- Job structure ---
-typedef struct {
+typedef struct Job {
     // --- Job Attributes ---
     int id;
     int inter_arrival_time_us; // time between this job and the previous job
@@ -53,14 +53,14 @@ void debug_job(Job* job);
 /**
  * @brief Arguments for the job receiver thread.
  */
-typedef struct {
+typedef struct JobThreadArgs {
     pthread_mutex_t* job_queue_mutex;
     pthread_mutex_t* stats_mutex;
     pthread_mutex_t* simulation_state_mutex; // protects all_jobs_arrived and terminate_now
     pthread_cond_t* job_queue_not_empty_cv;
-    LinkedList* job_queue;
-    SimulationParameters* simulation_params;
-    SimulationStatistics* stats;
+    struct LinkedList* job_queue;
+    struct SimulationParameters* simulation_params;
+    struct SimulationStatistics* stats;
     int* all_jobs_arrived;
 } JobThreadArgs;
 

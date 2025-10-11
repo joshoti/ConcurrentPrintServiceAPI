@@ -19,7 +19,7 @@ typedef struct ListNode {
     struct ListNode* prev;
 } ListNode;
 
-typedef struct {
+typedef struct LinkedList {
     int members_count;
     ListNode head;
     ListNode tail;

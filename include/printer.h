@@ -2,7 +2,7 @@
 #define PRINTER_H
 
 // --- Printer structure ---
-typedef struct {
+typedef struct Printer {
     int id; // Unique identifier for the printer
     int paper_count; // Current number of papers in the printer
     int capacity; // Maximum paper capacity of the printer
