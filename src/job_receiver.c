@@ -36,12 +36,12 @@ int init_job(Job* job, int job_id, int inter_arrival_time_us, int papers_require
     return TRUE;
 }
 
-void drop_job_from_system(Job* job, unsigned long previous_job_arrival_time_us) {
+void drop_job_from_system(Job* job, unsigned long previous_job_arrival_time_us, SimulationStatistics* stats) {
     if (job == NULL) return;
     
     // Log the dropped job (this will update statistics internally)
-    log_dropped_job(job, previous_job_arrival_time_us, NULL); // stats will be passed by caller
-    
+    log_dropped_job(job, previous_job_arrival_time_us, stats);
+
     // Free the job memory
     free(job);
 }
@@ -65,12 +65,15 @@ void debug_job(Job* job) {
 }
 
 void* job_receiver_thread_func(void* arg) {
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+
     JobThreadArgs* args = (JobThreadArgs*)arg;
     if (args == NULL) {
         fprintf(stderr, "Error: JobThreadArgs is NULL\n");
         return NULL;
     }
     
+    if (g_debug) printf("Job receiver thread started\n");
     // Extract arguments
     pthread_mutex_t* job_queue_mutex = args->job_queue_mutex;
     pthread_mutex_t* stats_mutex = args->stats_mutex;
@@ -80,24 +83,17 @@ void* job_receiver_thread_func(void* arg) {
     SimulationParameters* params = args->simulation_params;
     SimulationStatistics* stats = args->stats;
     int* all_jobs_arrived = args->all_jobs_arrived;
-    
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-
-    if (g_debug) printf("Job receiver thread started\n");
 
     unsigned long previous_job_arrival_time_us = stats->simulation_start_time_us;
     
-    for (int job_idx = 0; job_idx < params->num_jobs; job_idx++) {
-        int inter_arrival_time_us;
-        int papers_required;
-        
-        inter_arrival_time_us = (int)params->job_arrival_time_us;
-        papers_required = random_between(params->papers_required_lower_bound, params->papers_required_upper_bound);
+    for (int job_id = 0; job_id < params->num_jobs; job_id++) {
+        const int inter_arrival_time_us = (int)params->job_arrival_time_us;
+        const int papers_required = random_between(params->papers_required_lower_bound, params->papers_required_upper_bound);
 
         // Allocate and initialize job
         Job* job = (Job*)malloc(sizeof(Job));
-        if (!init_job(job, job_idx + 1, inter_arrival_time_us, papers_required)) {
-            fprintf(stderr, "Error: Failed to initialize job %d\n", job_idx + 1);
+        if (!init_job(job, job_id + 1, inter_arrival_time_us, papers_required)) {
+            fprintf(stderr, "Error: Failed to initialize job %d\n", job_id + 1);
             free(job);
             continue;
         }
@@ -105,25 +101,27 @@ void* job_receiver_thread_func(void* arg) {
         // Sleep for inter-arrival time
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
         usleep(inter_arrival_time_us);
-        
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
         
         // Check for termination signal
         pthread_mutex_lock(simulation_state_mutex);
-        if (g_terminate_now) {
+        int terminate_now = g_terminate_now;
+        pthread_mutex_unlock(simulation_state_mutex);
+        if (terminate_now) {
             *all_jobs_arrived = 1;
-            pthread_mutex_unlock(simulation_state_mutex);
             free(job);
             break;
         }
-        pthread_mutex_unlock(simulation_state_mutex);
         
         // Set system arrival time
         job->system_arrival_time_us = get_time_in_us();
+        pthread_mutex_lock(stats_mutex);
+        log_system_arrival(job, previous_job_arrival_time_us, stats);
+        pthread_mutex_unlock(stats_mutex);
         
         // Check if job should be dropped (e.g., if queue is full)
         pthread_mutex_lock(job_queue_mutex);
-        
+
         int queue_length = timed_queue_length(job_queue);
         if (queue_length >= params->queue_capacity) {
             // Drop the job
@@ -131,7 +129,7 @@ void* job_receiver_thread_func(void* arg) {
             unsigned long temp_arrival_time_us = job->system_arrival_time_us; // store before freeing
             
             pthread_mutex_lock(stats_mutex);
-            drop_job_from_system(job, previous_job_arrival_time_us);
+            drop_job_from_system(job, previous_job_arrival_time_us, stats);
             pthread_mutex_unlock(stats_mutex);
 
             previous_job_arrival_time_us = temp_arrival_time_us;
