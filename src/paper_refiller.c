@@ -85,11 +85,15 @@ void* paper_refiller_thread_func(void* arg) {
             
             usleep(time_to_refill_us);
             
+            unsigned long refill_end_time_us = get_time_in_us();
+            int actual_refill_time_ms = (refill_end_time_us - refill_start_time_us) / 1000;
+            log_paper_refill_end(printer, actual_refill_time_ms, refill_end_time_us);
+            
             // Done refilling
             printer->current_paper_count += papers_needed;
             pthread_mutex_lock(args->stats_mutex);
             args->stats->papers_refilled += papers_needed;
-            args->stats->total_refill_service_time_us += get_time_in_us() - refill_start_time_us;
+            args->stats->total_refill_service_time_us += refill_end_time_us - refill_start_time_us;
             pthread_mutex_unlock(args->stats_mutex);
             free(elem);
             if (g_debug) debug_refiller(papers_needed);
