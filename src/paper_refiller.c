@@ -61,6 +61,8 @@ void* paper_refiller_thread_func(void* arg) {
             return NULL;
         }
 
+        if (is_exit_condition_met(args->refill_needed_cv, args->paper_refill_queue_mutex, *(args->all_jobs_served))) return NULL;
+
         while (!list_is_empty(args->paper_refill_queue)) {
             pthread_mutex_lock(args->stats_mutex);
             args->stats->paper_refill_events++;
