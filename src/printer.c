@@ -43,60 +43,46 @@ void* printer_thread_func(void* arg) {
             pthread_cond_wait(args->job_queue_not_empty_cv, args->job_queue_mutex);
             if (terminate || is_exit_condition_met(*(args->all_jobs_arrived), args->job_queue)) break;
         }
-        if (terminate) {
-            // empty job queue if service is terminating
-            while (!timed_queue_is_empty(args->job_queue)) {
-                ListNode* elem = timed_queue_dequeue_front(args->job_queue);
-                Job* job = (Job*)elem->data;
-                job->queue_departure_time_us = get_time_in_us();
-                log_removed_job(job);
-                args->stats->total_jobs_removed++;
-                free(elem);
-                free(job);
-            }
-            if (g_debug) printf("Printer %d is terminating\n", args->printer->id);
+        if (terminate || is_exit_condition_met(*(args->all_jobs_arrived), args->job_queue)) {
+            if (g_debug) printf("Printer %d is terminating or finished\n", args->printer->id);
             pthread_mutex_unlock(args->job_queue_mutex);
-            break;
-        }
-        if (is_exit_condition_met(*(args->all_jobs_arrived), args->job_queue)) {
-            pthread_mutex_unlock(args->job_queue_mutex);
-            if (g_debug) printf("Printer %d has finished\n", args->printer->id);
             break;
         }
         // --- Process job ---
         // Check if there are enough papers
-        // CHECK BELOW
-        ListNode* printer_elem = NULL;
-        pthread_mutex_lock(args->paper_refill_queue_mutex);
-        if (args->printer->current_paper_count <= 0) {
-            // Request paper refill
-            if (g_debug) printf("Printer %d is out of paper and requesting refill\n", args->printer->id);
+        /*
+        Consider case of when printer sees job, goes to refill, but while waiting another printer services
+        the job and takes it from the queue. And the case where that was the last job in the system.
+        */
+        ListNode* elem = timed_queue_first(args->job_queue);
+        Job* job_to_dequeue = (Job*)elem->data;
+        if (job_to_dequeue->papers_required > args->printer->current_paper_count) {
+            // Not enough paper for the job at the front of the queue
+            pthread_mutex_unlock(args->job_queue_mutex);
+            pthread_mutex_lock(args->paper_refill_queue_mutex);
+            unsigned long refill_start_time_us = get_time_in_us();
+            log_paper_empty(args->printer, job_to_dequeue->id, refill_start_time_us);
             list_append(args->paper_refill_queue, args->printer);
-            pthread_cond_signal(args->refill_needed_cv); // Notify refill thread
+            pthread_cond_broadcast(args->refill_needed_cv); // Notify refill thread
+
             // Wait until paper is refilled
-            while (args->printer->current_paper_count <= 0) {
-                pthread_cond_wait(args->refill_needed_cv, args->paper_refill_queue_mutex);
-                // Safely check the termination flag
-                pthread_mutex_lock(args->simulation_state_mutex);
-                int terminate_now = g_terminate_now;
-                pthread_mutex_unlock(args->simulation_state_mutex);
-                if (terminate_now) {
-                    if (g_debug) printf("Printer %d is terminating while waiting for paper\n", args->printer->id);
-                    pthread_cond_broadcast(args->job_queue_not_empty_cv); // wake up server threads to let them exit if needed
-                    pthread_mutex_unlock(args->paper_refill_queue_mutex);
-                    pthread_mutex_unlock(args->job_queue_mutex);
-                    return NULL;
-                }
-                if (is_exit_condition_met(*(args->all_jobs_arrived), args->job_queue)) {
-                    pthread_mutex_unlock(args->paper_refill_queue_mutex);
-                    pthread_mutex_unlock(args->job_queue_mutex);
-                    if (g_debug) printf("Printer %d has finished\n", args->printer->id);
-                    return NULL;
-                }
+            pthread_cond_wait(args->refill_needed_cv, args->paper_refill_queue_mutex);
+            pthread_mutex_unlock(args->paper_refill_queue_mutex);
+
+            // Update stats for paper empty duration
+            pthread_mutex_lock(args->stats_mutex);
+            int paper_empty_duration_us = get_time_in_us() - refill_start_time_us;
+            if (args->printer->id == 1) {
+                args->stats->printer1_paper_empty_time_us +=
+                    paper_empty_duration_us; // stats: total time printer 1 was idle due to no paper
+            } else if (args->printer->id == 2) {
+                args->stats->printer2_paper_empty_time_us +=
+                    paper_empty_duration_us; // stats: total time printer 2 was idle due to no paper
             }
+            pthread_mutex_unlock(args->stats_mutex);
+            continue;
         }
-        pthread_mutex_unlock(args->paper_refill_queue_mutex);
-        // CHECK ABOVE
+
         // Get the next job from the queue
         ListNode* elem = timed_queue_dequeue_front(args->job_queue);
         Job* job = (Job*)elem->data;
@@ -112,6 +98,7 @@ void* printer_thread_func(void* arg) {
         // Service the job
         usleep(job->service_time_requested_ms * 1000); // Convert ms to us
         args->printer->current_paper_count -= job->papers_required;
+        args->printer->total_papers_used += job->papers_required;
 
         // Update job departure time
         job->service_departure_time_us = get_time_in_us();
