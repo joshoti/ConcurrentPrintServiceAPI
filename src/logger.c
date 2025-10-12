@@ -184,10 +184,10 @@ void log_system_departure(const Job* job, const Printer* printer,
     funlockfile(stdout);
 }
 
-void log_paper_empty(Printer* printer, unsigned long current_time_us) {
+void log_paper_empty(Printer* printer, int job_id, unsigned long current_time_us) {
     flockfile(stdout);
     log_time(current_time_us, reference_time_us);
-    printf("printer%d is out of paper\n", printer->id);
+    printf("printer%d does not have enough paper for job%d and is requesting refill\n", printer->id, job_id);
     funlockfile(stdout);
 }
 

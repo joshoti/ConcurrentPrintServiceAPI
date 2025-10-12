@@ -103,10 +103,11 @@ void publish_system_departure(const struct Job* job, const struct Printer* print
  * @brief Publishes an event when a printer runs out of paper.
  *
  * @param printer The printer that has run out of paper.
+ * @param job_id The id of the job that cannot be processed due to lack of paper.
  * @param current_time_us The current simulation time in microseconds.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
-void publish_paper_empty(struct Printer* printer, unsigned long current_time_us,
+void publish_paper_empty(struct Printer* printer, int job_id, unsigned long current_time_us,
     struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a printer starts refilling paper.

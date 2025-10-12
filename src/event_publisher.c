@@ -231,14 +231,14 @@ void publish_system_departure(const Job* job, const Printer* printer,
     }
 }
 
-void publish_paper_empty(Printer* printer, unsigned long current_time_us,
+void publish_paper_empty(Printer* printer, int job_id, unsigned long current_time_us,
     struct mg_connection* ws_conn)
 {
     char time_buf[64];
     char buf[1024];
     write_time_to_buffer(current_time_us, reference_time_us, time_buf);
-    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d is out of paper\"}",
-        time_buf, printer->id);
+    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d does not have enough paper for job%d and is requesting refill\"}",
+        time_buf, printer->id, job_id);
     if (ws_conn) {
         mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
     }
