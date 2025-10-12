@@ -141,7 +141,7 @@ void* printer_thread_func(void* arg) {
     pthread_mutex_unlock(args->simulation_state_mutex);
 
     pthread_mutex_lock(args->paper_refill_queue_mutex);
-    pthread_cond_signal(args->refill_needed_cv); // Notify refill thread in case it's waiting
+    pthread_cond_broadcast(args->refill_needed_cv); // Notify refill thread in case it's waiting
     pthread_mutex_unlock(args->paper_refill_queue_mutex);
     if (g_debug) printf("Printer %d has exited\n", args->printer->id);
     return NULL;

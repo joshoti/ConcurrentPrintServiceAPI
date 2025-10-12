@@ -150,7 +150,7 @@ void* job_receiver_thread_func(void* arg) {
         previous_job_arrival_time_us = job->system_arrival_time_us;
         
         // Signal that a job is available
-        pthread_cond_signal(job_queue_not_empty_cv);
+        pthread_cond_broadcast(job_queue_not_empty_cv);
         pthread_mutex_unlock(job_queue_mutex);
     }
     
