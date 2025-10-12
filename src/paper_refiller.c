@@ -72,7 +72,7 @@ void* paper_refiller_thread_func(void* arg) {
             pthread_mutex_unlock(args->paper_refill_queue_mutex); // unlock while refilling
 
             // Refill paper
-            int papers_needed = printer->capacity - printer->paper_count;
+            int papers_needed = printer->capacity - printer->current_paper_count;
             if (papers_needed <= 0) {
                 if (g_debug) printf("Debug: Paper Refiller found printer %d already full\n", printer->id);
             }
@@ -84,7 +84,7 @@ void* paper_refiller_thread_func(void* arg) {
             usleep(time_to_refill_us);
             
             // Done refilling
-            printer->paper_count += papers_needed;
+            printer->current_paper_count += papers_needed;
             pthread_mutex_lock(args->stats_mutex);
             args->stats->papers_refilled += papers_needed;
             args->stats->total_refill_service_time_us += get_time_in_us() - refill_start_time_us;

@@ -11,26 +11,24 @@ struct SimulationStatistics;
 // --- Printer structure ---
 typedef struct Printer {
     int id; // Unique identifier for the printer
-    int paper_count; // Current number of papers in the printer
+    int current_paper_count; // Current number of papers in the printer
+    int total_papers_used; // Total number of papers used by this printer
     int capacity; // Maximum paper capacity of the printer
-    int printed_count; // Total number of jobs printed by this printer
+    int jobs_printed_count; // Total number of jobs printed by this printer
 } Printer;
 
 // --- Utility functions ---
 /**
  * @brief Prints printer details for debugging purposes.
- * @param printer_id Unique identifier for the printer.
- * @param printed_count Total number of jobs printed by this printer.
+ * @param printer Pointer to the Printer struct.
  */
-void debug_printer(int printer_id, int printed_count);
+void debug_printer(const Printer* printer);
 
 // --- Printer Thread Arguments ---
 /**
  * @brief Arguments for the printer thread.
  */
 typedef struct PrinterThreadArgs {
-    // TODO: use printer_mutex?
-    // pthread_mutex_t* printer_mutex;
     pthread_mutex_t* paper_refill_queue_mutex;
     pthread_mutex_t* job_queue_mutex;
     pthread_mutex_t* stats_mutex;
