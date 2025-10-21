@@ -64,12 +64,7 @@ void* paper_refiller_thread_func(void* arg) {
             return NULL;
         }
 
-        if (is_exit_condition_met(args->refill_needed_cv, args->paper_refill_queue_mutex, *(args->all_jobs_served))) return NULL;
-
         while (!list_is_empty(args->paper_refill_queue)) {
-            pthread_mutex_lock(args->stats_mutex);
-            args->stats->paper_refill_events++;
-            pthread_mutex_unlock(args->stats_mutex);
             unsigned long refill_start_time_us = get_time_in_us();
             
             ListNode* elem = list_pop_left(args->paper_refill_queue);
@@ -86,17 +81,20 @@ void* paper_refiller_thread_func(void* arg) {
             int time_to_refill_ms = time_to_refill_us / 1000; // for logging and publishing
             log_paper_refill_start(printer, papers_needed, time_to_refill_ms, refill_start_time_us);
             
+            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
             usleep(time_to_refill_us);
+            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
             
             unsigned long refill_end_time_us = get_time_in_us();
             int actual_refill_time_ms = (refill_end_time_us - refill_start_time_us) / 1000;
             log_paper_refill_end(printer, actual_refill_time_ms, refill_end_time_us);
-            
+
             // Done refilling
             printer->current_paper_count += papers_needed;
             pthread_mutex_lock(args->stats_mutex);
             args->stats->papers_refilled += papers_needed;
             args->stats->total_refill_service_time_us += refill_end_time_us - refill_start_time_us;
+            args->stats->paper_refill_events++;
             pthread_mutex_unlock(args->stats_mutex);
             free(elem);
             if (g_debug) debug_refiller(papers_needed);
