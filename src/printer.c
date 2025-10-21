@@ -84,7 +84,7 @@ void* printer_thread_func(void* arg) {
         }
 
         // Get the next job from the queue
-        ListNode* elem = timed_queue_dequeue_front(args->job_queue);
+        elem = timed_queue_dequeue_front(args->job_queue);
         Job* job = (Job*)elem->data;
         job->queue_departure_time_us = get_time_in_us();
         log_queue_departure(job, args->stats, args->job_queue);
