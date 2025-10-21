@@ -26,7 +26,6 @@ void empty_queue_if_terminating(TimedQueue* queue, SimulationStatistics* stats) 
     }
 }
 
-
 void* sig_int_catching_thread_func(void* arg) {
     int sig;
     SignalCatchingThreadArgs* args = (SignalCatchingThreadArgs*)arg;
@@ -41,7 +40,9 @@ void* sig_int_catching_thread_func(void* arg) {
     log_ctrl_c_pressed(args->stats);
     pthread_mutex_unlock(args->stats_mutex);
     if (g_debug) printf("Canceling job receiver thread\n");
-    pthread_cancel(args->job_receiver_thread);
+    if (args->job_receiver_thread) pthread_cancel(*args->job_receiver_thread);
+    if (g_debug) printf("Canceling paper refiller thread\n");
+    if (args->paper_refiller_thread) pthread_cancel(*args->paper_refiller_thread);
     
     // Lock both mutexes in a defined order to prevent deadlock
     pthread_mutex_lock(args->job_queue_mutex);

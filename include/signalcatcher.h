@@ -28,7 +28,8 @@ typedef struct SignalCatchingThreadArgs {
     pthread_cond_t* job_queue_not_empty_cv; // Condition variable to signal other threads
     struct TimedQueue* job_queue; // Pointer to the job queue to be emptied
     struct SimulationStatistics* stats; // Simulation statistics to update
-    pthread_t job_receiver_thread; // Thread ID of the job receiver thread to cancel
+    pthread_t* job_receiver_thread; // Pointer to job receiver thread to cancel
+    pthread_t* paper_refiller_thread; // Pointer to paper refiller thread to cancel
     int* all_jobs_arrived; // Flag indicating if all jobs have arrived
 } SignalCatchingThreadArgs;
 
