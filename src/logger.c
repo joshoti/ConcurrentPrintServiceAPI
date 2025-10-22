@@ -157,7 +157,8 @@ void log_printer_arrival(const Job* job, const Printer* printer) {
 }
 
 void log_system_departure(const Job* job, const Printer* printer,
-    SimulationStatistics* stats) {
+    SimulationStatistics* stats)
+{
     flockfile(stdout);
     log_time(job->service_departure_time_us, reference_time_us);
 
@@ -170,9 +171,11 @@ void log_system_departure(const Job* job, const Printer* printer,
     if (printer->id == 1) {
         stats->total_service_time_p1_us += service_duration; // stats: avg job service time
         stats->jobs_served_by_printer1 += 1; // stats: total jobs served by printer 1
+        stats->printer1_paper_used += job->papers_required; // stats: total paper used by printer 1
     } else if (printer->id == 2) {
         stats->total_service_time_p2_us += service_duration; // stats: avg job service time
         stats->jobs_served_by_printer2 += 1; // stats: total jobs served by printer 2
+        stats->printer2_paper_used += job->papers_required; // stats: total paper used by printer 2
     }
     stats->total_queue_wait_time_us +=
         (job->queue_departure_time_us - job->queue_arrival_time_us); // stats: avg job queue wait time

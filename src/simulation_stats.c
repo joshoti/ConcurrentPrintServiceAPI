@@ -172,6 +172,8 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
         "\"total_jobs_served\":%.0f,"
         "\"total_jobs_dropped\":%.0f,"
         "\"total_jobs_removed\":%.0f,"
+        "\"job_arrival_rate_per_sec\":%.6g,"
+        "\"job_drop_probability\":%.6g,"
         "\"avg_inter_arrival_time_sec\":%.6g,"
         "\"avg_system_time_sec\":%.6g,"
         "\"system_time_std_dev_sec\":%.6g,"
@@ -179,13 +181,13 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
         "\"avg_queue_length\":%.6g,"
         "\"max_queue_length\":%u,"
         "\"jobs_served_by_printer1\":%.0f,"
+        "\"printer1_paper_used\":%d,"
         "\"jobs_served_by_printer2\":%.0f,"
+        "\"printer2_paper_used\":%d,"
         "\"avg_service_time_p1_sec\":%.6g,"
         "\"avg_service_time_p2_sec\":%.6g,"
         "\"utilization_p1\":%.6g,"
         "\"utilization_p2\":%.6g,"
-        "\"job_arrival_rate_per_sec\":%.6g,"
-        "\"job_drop_probability\":%.6g,"
         "\"paper_refill_events\":%.0f,"
         "\"total_refill_service_time_us\":%lu,"
         "\"papers_refilled\":%d"
@@ -195,6 +197,8 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
         stats->total_jobs_served,
         stats->total_jobs_dropped,
         stats->total_jobs_removed,
+        job_arrival_rate,
+        job_drop_probability,
         avg_inter_arrival_time,
         avg_system_time,
         system_time_std_dev,
@@ -202,13 +206,13 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
         avg_queue_length,
         stats->max_job_queue_length,
         stats->jobs_served_by_printer1,
+        stats->printer1_paper_used,
         stats->jobs_served_by_printer2,
+        stats->printer2_paper_used,
         avg_service_time_p1,
         avg_service_time_p2,
         utilization_p1,
         utilization_p2,
-        job_arrival_rate,
-        job_drop_probability,
         stats->paper_refill_events,
         stats->total_refill_service_time_us,
         stats->papers_refilled
@@ -261,7 +265,9 @@ void log_statistics(SimulationStatistics* stats) {
     printf("\n");
     printf("--- Printer Statistics ---\n");
     printf("Jobs Served by Printer 1:          %.0f\n", stats->jobs_served_by_printer1);
+    printf("Total Paper Used by Printer 1:     %d\n", stats->printer1_paper_used);
     printf("Jobs Served by Printer 2:          %.0f\n", stats->jobs_served_by_printer2);
+    printf("Total Paper Used by Printer 2:     %d\n", stats->printer2_paper_used);
     printf("Avg Service Time (Printer 1):      %.6g sec\n", avg_service_time_p1);
     printf("Avg Service Time (Printer 2):      %.6g sec\n", avg_service_time_p2);
     printf("Utilization (Printer 1):           %.6g%%\n", utilization_p1 * 100);

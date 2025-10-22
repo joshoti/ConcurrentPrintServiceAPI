@@ -22,11 +22,13 @@ typedef struct SimulationStatistics {
 
     // --- Printer 1 (S1) Metrics ---
     double jobs_served_by_printer1;             // Total jobs completed by printer 1
+    int printer1_paper_used;                     // Total paper used by printer 1
     unsigned long total_service_time_p1_us;     // Sum of service times for jobs on printer 1
     unsigned long printer1_paper_empty_time_us; // Total time printer 1 was idle due to no paper
 
     // --- Printer 2 (S2) Metrics ---
     double jobs_served_by_printer2;             // Total jobs completed by printer 2
+    int printer2_paper_used;                     // Total paper used by printer 2
     unsigned long total_service_time_p2_us;     // Sum of service times for jobs on printer 2
     unsigned long printer2_paper_empty_time_us; // Total time printer 2 was idle due to no paper
 
