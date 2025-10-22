@@ -21,18 +21,12 @@ void debug_refiller(int papers_supplied) {
 /**
  * @brief Checks if the exit condition for the paper refiller thread is met.
  * 
- * @param refill_needed_cv Pointer to the condition variable to signal threads.
- * @param paper_refill_queue_mutex Pointer to the mutex protecting the paper refill queue.
+ * @param all_jobs_served Indicator if all jobs have been served.
  * @return TRUE if exit condition is met, FALSE otherwise.
  */
-static int is_exit_condition_met(pthread_cond_t* refill_needed_cv,
-    pthread_mutex_t* paper_refill_queue_mutex, int all_jobs_served)
-{
+static int is_exit_condition_met(int all_jobs_served) {
     if (all_jobs_served) {
         if (g_debug) printf("Paper refiller thread has finished\n");
-        pthread_mutex_lock(paper_refill_queue_mutex);
-        pthread_cond_broadcast(refill_needed_cv); // wake up printer threads to let them exit if needed
-        pthread_mutex_unlock(paper_refill_queue_mutex);
         return TRUE;
     }
     return FALSE;
@@ -52,9 +46,10 @@ void* paper_refiller_thread_func(void* arg) {
         pthread_cond_wait(args->refill_needed_cv, args->paper_refill_queue_mutex); // wait until signaled to refill paper
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
-        // Safely check the termination flag
+        // Safely check shared flags
         pthread_mutex_lock(args->simulation_state_mutex);
         int terminate_now = g_terminate_now;
+        int are_all_jobs_served = *(args->all_jobs_served);
         pthread_mutex_unlock(args->simulation_state_mutex);
 
         if (terminate_now) {
@@ -62,6 +57,11 @@ void* paper_refiller_thread_func(void* arg) {
             pthread_cond_broadcast(args->refill_needed_cv); // wake up server threads to let them exit if needed
             pthread_mutex_unlock(args->paper_refill_queue_mutex);
             return NULL;
+        }
+        if (is_exit_condition_met(are_all_jobs_served)) {
+            pthread_cond_broadcast(args->refill_needed_cv); // wake up printer threads to let them exit if needed
+            pthread_mutex_unlock(args->paper_refill_queue_mutex);
+            break;
         }
 
         while (!list_is_empty(args->paper_refill_queue)) {
@@ -99,8 +99,7 @@ void* paper_refiller_thread_func(void* arg) {
             free(elem);
             if (g_debug) debug_refiller(papers_needed);
         }
-
-        if (is_exit_condition_met(args->refill_needed_cv, args->paper_refill_queue_mutex, *(args->all_jobs_served))) return NULL;
     }
+    if (g_debug) printf("Paper refiller gracefully exited\n");
     return NULL;
 }

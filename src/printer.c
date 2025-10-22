@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include "preprocessing.h"
 #include "common.h"
 #include "timeutils.h"
 #include "logger.h"
@@ -91,6 +92,10 @@ void* printer_thread_func(void* arg) {
 
         pthread_mutex_unlock(args->job_queue_mutex);
 
+        // Update job service_time_requested_ms based on printer speed if needed
+        job->service_time_requested_ms =
+                (int)((job->papers_required / args->params->printing_rate) * 1000); // in ms
+
         // Log job arrival at printer
         job->service_arrival_time_us = get_time_in_us();
         log_printer_arrival(job, args->printer);
@@ -114,10 +119,17 @@ void* printer_thread_func(void* arg) {
         free(elem);
         free(job);
 
-        if (is_exit_condition_met(*(args->all_jobs_arrived), args->job_queue)) {
+        // Check exit condition.
+        pthread_mutex_lock(args->simulation_state_mutex);
+        int have_all_jobs_arrived = *(args->all_jobs_arrived);
+        pthread_mutex_unlock(args->simulation_state_mutex);
+        pthread_mutex_lock(args->job_queue_mutex);
+        if (is_exit_condition_met(have_all_jobs_arrived, args->job_queue)) {
+            pthread_mutex_unlock(args->job_queue_mutex);
             if (g_debug) printf("Printer %d has finished\n", args->printer->id);
             break;
         }
+        pthread_mutex_unlock(args->job_queue_mutex);
 
         if (g_debug) printf("Printer %d is looking for next job\n", args->printer->id);
         if (g_debug) debug_printer(args->printer);
@@ -131,6 +143,6 @@ void* printer_thread_func(void* arg) {
     pthread_cond_broadcast(args->refill_needed_cv); // Notify printer thread in case it's waiting
     pthread_cond_broadcast(args->refill_done_cv); // Notify refill thread in case it's waiting
     pthread_mutex_unlock(args->paper_refill_queue_mutex);
-    if (g_debug) printf("Printer %d has exited\n", args->printer->id);
+    if (g_debug) printf("Printer %d gracefully exited\n", args->printer->id);
     return NULL;
 }

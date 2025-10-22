@@ -160,7 +160,9 @@ void* job_receiver_thread_func(void* arg) {
     pthread_mutex_unlock(simulation_state_mutex);
     
     // Wake up any waiting threads
+    pthread_mutex_lock(job_queue_mutex);
     pthread_cond_broadcast(job_queue_not_empty_cv);
-    
+    pthread_mutex_unlock(job_queue_mutex);
+    if (g_debug) printf("Job receiver thread gracefully exited\n");
     return NULL;
 }

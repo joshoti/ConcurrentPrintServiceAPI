@@ -33,13 +33,13 @@ static void log_time(unsigned long time_us, unsigned long reference_time_us) {
 
 void log_simulation_parameters(const SimulationParameters* params) {
     flockfile(stdout);
-    printf("================= Simulation parameters: =================\n");
+    printf("================= Simulation parameters =================\n");
     printf("  Number of jobs: %d\n", params->num_jobs);
-    printf("  Job arrival time: %.6g us\n", params->job_arrival_time_us);
-    printf("  Printing rate: %.6g\n", params->printing_rate);
+    printf("  Job arrival time: %.6g ms\n", params->job_arrival_time_us / 1000.0);
+    printf("  Printing rate: %.6g pages/sec\n", params->printing_rate);
     printf("  Printer paper capacity: %d\n", params->printer_paper_capacity);
     printf("  Queue capacity: %d\n", params->queue_capacity);
-    printf("  Refill rate: %.6g\n", params->refill_rate);
+    printf("  Refill rate: %.6g papers/sec\n", params->refill_rate);
     printf("  Papers required (lower bound): %d\n", params->papers_required_lower_bound);
     printf("  Papers required (upper bound): %d\n", params->papers_required_upper_bound);
     funlockfile(stdout);

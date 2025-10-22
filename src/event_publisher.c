@@ -39,7 +39,7 @@ void publish_simulation_parameters(const SimulationParameters* params, struct mg
         \"printing_rate\":%.6g, \"queue_capacity\":%d,\
         \"printer_paper_capacity\":%d, \"refill_rate\":%.6g, \"num_jobs\":%d,\
         \"papers_required_lower_bound\":%d, \"papers_required_upper_bound\":%d}}",
-            params->job_arrival_time_us, params->printing_rate, params->queue_capacity,
+            params->job_arrival_time_us / 1000.0, params->printing_rate, params->queue_capacity,
             params->printer_paper_capacity, params->refill_rate, params->num_jobs,
             params->papers_required_lower_bound, params->papers_required_upper_bound);
     if (ws_conn) {
