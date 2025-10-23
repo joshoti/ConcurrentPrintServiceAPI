@@ -65,20 +65,24 @@ void publish_removed_job(struct Job* job, struct mg_connection* ws_conn);
  * @param job The job that has arrived at the queue.
  * @param stats The simulation statistics to update.
  * @param job_queue The job queue to check the length of.
+ * @param last_interaction_time_us The last interaction time of the job queue.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
 void publish_queue_arrival(const struct Job* job, struct SimulationStatistics* stats,
-    struct TimedQueue* job_queue, struct mg_connection* ws_conn);
+    struct TimedQueue* job_queue, unsigned long last_interaction_time_us,
+    struct mg_connection* ws_conn);
 /**
  * @brief Publishes an event when a job departs from the queue.
  *
  * @param job The job that has departed from the queue.
  * @param stats The simulation statistics to update.
  * @param job_queue The job queue to check the length of.
+ * @param last_interaction_time_us The last interaction time of the job queue.
  * @param ws_conn The WebSocket connection to publish the event to.
  */
 void publish_queue_departure(const struct Job* job, struct SimulationStatistics* stats,
-    struct TimedQueue* job_queue, struct mg_connection* ws_conn);
+    struct TimedQueue* job_queue, unsigned long last_interaction_time_us,
+    struct mg_connection* ws_conn);
 
 /**
  * @brief Publishes an event when a job arrives at a printer for processing.

@@ -115,9 +115,11 @@ void log_removed_job(Job* job) {
     funlockfile(stdout);
 }
 
-void log_queue_arrival(const Job* job, SimulationStatistics* stats, TimedQueue* job_queue) {
+void log_queue_arrival(const Job* job, SimulationStatistics* stats,
+    TimedQueue* job_queue, unsigned long last_interaction_time_us)
+{
     stats->area_num_in_job_queue_us +=
-        (job->queue_arrival_time_us - job_queue->last_interaction_time_us) * // duration of previous state
+        (job->queue_arrival_time_us - last_interaction_time_us) * // duration of previous state
         (timed_queue_length(job_queue) - 1); // -1 for the job that just entered the queue
     // stats: avg job queue length
     job_queue->last_interaction_time_us = job->queue_arrival_time_us;
@@ -130,10 +132,10 @@ void log_queue_arrival(const Job* job, SimulationStatistics* stats, TimedQueue* 
 }
 
 void log_queue_departure(const Job* job, SimulationStatistics* stats,
-    TimedQueue* job_queue)
+    TimedQueue* job_queue, unsigned long last_interaction_time_us)
 {
     stats->area_num_in_job_queue_us +=
-        (job->queue_departure_time_us - job_queue->last_interaction_time_us) * // duration of previous state
+        (job->queue_departure_time_us - last_interaction_time_us) * // duration of previous state
         (timed_queue_length(job_queue) + 1); // +1 for the job that just left the queue
     // stats: avg job queue length
     job_queue->last_interaction_time_us = job->queue_departure_time_us;
