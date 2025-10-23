@@ -19,16 +19,16 @@ typedef struct SimulationParameters {
 } SimulationParameters;
 
 /**
- * job_arrival_time_us: 300,000 us = 1 job every 0.3 sec
- * papers_required_lower_bound: 20 pages
- * papers_required_upper_bound: 30 pages
- * queue_capacity: 30 jobs
- * printing_rate: 3.3 papers/sec
- * printer_paper_capacity: 200 pages
+ * job_arrival_time_us: 600,000 us = 1 job every 0.6 sec
+ * papers_required_lower_bound: 5 pages
+ * papers_required_upper_bound: 20 pages
+ * queue_capacity: 15 jobs
+ * printing_rate: 4 papers/sec
+ * printer_paper_capacity: 100 pages
  * refill_rate: 15 papers/sec
- * num_jobs: 10 jobs
+ * num_jobs: 20 jobs
  */
-#define SIMULATION_DEFAULT_PARAMS {300000, 20, 30, 30, 3.3, 200, 15, 10}
+#define SIMULATION_DEFAULT_PARAMS {600000, 5, 20, 15, 4, 100, 15, 20}
 
 /**
  * @brief Print usage information for the program.
