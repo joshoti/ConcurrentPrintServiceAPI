@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     pthread_mutex_t simulation_state_mutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_cond_t job_queue_not_empty_cv = PTHREAD_COND_INITIALIZER;
     pthread_cond_t refill_needed_cv = PTHREAD_COND_INITIALIZER;
-    pthread_cond_t refill_done_cv = PTHREAD_COND_INITIALIZER;
+    pthread_cond_t refill_supplier_cv = PTHREAD_COND_INITIALIZER;
 
     // --- Simulation state ---
     SimulationParameters params = SIMULATION_DEFAULT_PARAMS;
@@ -76,7 +76,8 @@ int main(int argc, char *argv[]) {
         .simulation_state_mutex = &simulation_state_mutex,
         .job_queue_not_empty_cv = &job_queue_not_empty_cv,
         .refill_needed_cv = &refill_needed_cv,
-        .refill_done_cv = &refill_done_cv,
+        .refill_supplier_cv = &refill_supplier_cv,
+        .paper_refill_thread = &paper_refill_thread,
         .job_queue = &job_queue,
         .paper_refill_queue = &paper_refill_queue,
         .params = &params,
@@ -93,7 +94,8 @@ int main(int argc, char *argv[]) {
         .simulation_state_mutex = &simulation_state_mutex,
         .job_queue_not_empty_cv = &job_queue_not_empty_cv,
         .refill_needed_cv = &refill_needed_cv,
-        .refill_done_cv = &refill_done_cv,
+        .refill_supplier_cv = &refill_supplier_cv,
+        .paper_refill_thread = &paper_refill_thread,
         .job_queue = &job_queue,
         .paper_refill_queue = &paper_refill_queue,
         .params = &params,
@@ -108,6 +110,7 @@ int main(int argc, char *argv[]) {
         .stats_mutex = &stats_mutex,
         .simulation_state_mutex = &simulation_state_mutex,
         .refill_needed_cv = &refill_needed_cv,
+        .refill_supplier_cv = &refill_supplier_cv,
         .paper_refill_queue = &paper_refill_queue,
         .params = &params,
         .stats = &stats,
@@ -176,7 +179,7 @@ int main(int argc, char *argv[]) {
     pthread_mutex_destroy(&simulation_state_mutex);
     pthread_cond_destroy(&job_queue_not_empty_cv);
     pthread_cond_destroy(&refill_needed_cv);
-    pthread_cond_destroy(&refill_done_cv);
+    pthread_cond_destroy(&refill_supplier_cv);
 
     if (g_debug) printf("All threads joined and resources cleaned up.\n");
     return 0;

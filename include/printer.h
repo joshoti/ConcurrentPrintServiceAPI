@@ -35,7 +35,8 @@ typedef struct PrinterThreadArgs {
     pthread_mutex_t* simulation_state_mutex; // protects g_terminate_now
     pthread_cond_t* job_queue_not_empty_cv;
     pthread_cond_t* refill_needed_cv;
-    pthread_cond_t* refill_done_cv;
+    pthread_cond_t* refill_supplier_cv;
+    pthread_t* paper_refill_thread;
     struct TimedQueue* job_queue;
     struct LinkedList* paper_refill_queue;
     struct SimulationParameters* params;

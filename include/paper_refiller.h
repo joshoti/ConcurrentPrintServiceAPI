@@ -24,6 +24,7 @@ typedef struct PaperRefillerThreadArgs {
     pthread_mutex_t* stats_mutex;
     pthread_mutex_t* simulation_state_mutex; // protects g_terminate_now
     pthread_cond_t* refill_needed_cv;
+    pthread_cond_t* refill_supplier_cv;
     struct LinkedList* paper_refill_queue;
     struct SimulationParameters* params;
     struct SimulationStatistics* stats;
