@@ -189,7 +189,7 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
         "\"utilization_p1\":%.6g,"
         "\"utilization_p2\":%.6g,"
         "\"paper_refill_events\":%.0f,"
-        "\"total_refill_service_time_us\":%lu,"
+        "\"total_refill_service_time_us\":%.6g,"
         "\"papers_refilled\":%d"
         "}}",
         simulation_time_sec,
@@ -214,7 +214,7 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
         utilization_p1,
         utilization_p2,
         stats->paper_refill_events,
-        stats->total_refill_service_time_us,
+        stats->total_refill_service_time_us / 1000000.0,
         stats->papers_refilled
     );
 
@@ -275,7 +275,7 @@ void log_statistics(SimulationStatistics* stats) {
     printf("\n");
     printf("--- Paper Management ---\n");
     printf("Paper Refill Events:               %.0f\n", stats->paper_refill_events);
-    printf("Total Refill Service Time:         %lu\n", stats->total_refill_service_time_us);
+    printf("Total Refill Service Time:         %.6g sec\n", stats->total_refill_service_time_us / 1000000.0);
     printf("Papers Refilled:                   %d\n", stats->papers_refilled);
     printf("=========================================================\n");
     
