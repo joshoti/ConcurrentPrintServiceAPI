@@ -167,29 +167,29 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
     // Build comprehensive JSON statistics message
     int len = snprintf(buf, buf_size,
         "{\"type\":\"statistics\", \"data\":{"
-        "\"simulation_duration_sec\":%.6g,"
+        "\"simulation_duration_sec\":%.3g,"
         "\"total_jobs_arrived\":%.0f,"
         "\"total_jobs_served\":%.0f,"
         "\"total_jobs_dropped\":%.0f,"
         "\"total_jobs_removed\":%.0f,"
-        "\"job_arrival_rate_per_sec\":%.6g,"
-        "\"job_drop_probability\":%.6g,"
-        "\"avg_inter_arrival_time_sec\":%.6g,"
-        "\"avg_system_time_sec\":%.6g,"
-        "\"system_time_std_dev_sec\":%.6g,"
-        "\"avg_queue_wait_time_sec\":%.6g,"
-        "\"avg_queue_length\":%.6g,"
+        "\"job_arrival_rate_per_sec\":%.3g,"
+        "\"job_drop_probability\":%.3g,"
+        "\"avg_inter_arrival_time_sec\":%.3g,"
+        "\"avg_system_time_sec\":%.3g,"
+        "\"system_time_std_dev_sec\":%.3g,"
+        "\"avg_queue_wait_time_sec\":%.3g,"
+        "\"avg_queue_length\":%.3g,"
         "\"max_queue_length\":%u,"
         "\"jobs_served_by_printer1\":%.0f,"
         "\"printer1_paper_used\":%d,"
         "\"jobs_served_by_printer2\":%.0f,"
         "\"printer2_paper_used\":%d,"
-        "\"avg_service_time_p1_sec\":%.6g,"
-        "\"avg_service_time_p2_sec\":%.6g,"
-        "\"utilization_p1\":%.6g,"
-        "\"utilization_p2\":%.6g,"
+        "\"avg_service_time_p1_sec\":%.3g,"
+        "\"avg_service_time_p2_sec\":%.3g,"
+        "\"utilization_p1\":%.3g,"
+        "\"utilization_p2\":%.3g,"
         "\"paper_refill_events\":%.0f,"
-        "\"total_refill_service_time_us\":%.6g,"
+        "\"total_refill_service_time_us\":%.3g,"
         "\"papers_refilled\":%d"
         "}}",
         simulation_time_sec,
@@ -243,24 +243,24 @@ void log_statistics(SimulationStatistics* stats) {
     
     printf("\n");
     printf("================= SIMULATION STATISTICS =================\n");
-    printf("Simulation Duration:               %.6g sec\n", simulation_time_sec);
+    printf("Simulation Duration:               %.3g sec\n", simulation_time_sec);
     printf("\n");
     printf("--- Job Flow Statistics ---\n");
     printf("Total Jobs Arrived:                %.0f\n", stats->total_jobs_arrived);
     printf("Total Jobs Served:                 %.0f\n", stats->total_jobs_served);
     printf("Total Jobs Dropped:                %.0f\n", stats->total_jobs_dropped);
     printf("Total Jobs Removed:                %.0f\n", stats->total_jobs_removed);
-    printf("Job Arrival Rate (λ):              %.6g jobs/sec\n", job_arrival_rate);
-    printf("Job Drop Probability:              %.6g (%.2f%%)\n", job_drop_probability, job_drop_probability * 100);
+    printf("Job Arrival Rate (λ):              %.3g jobs/sec\n", job_arrival_rate);
+    printf("Job Drop Probability:              %.3g (%.2f%%)\n", job_drop_probability, job_drop_probability * 100);
     printf("\n");
     printf("--- Timing Statistics ---\n");
-    printf("Average Inter-arrival Time:        %.6g sec\n", avg_inter_arrival_time);
-    printf("Average System Time:               %.6g sec\n", avg_system_time);
-    printf("System Time Standard Deviation:    %.6g sec\n", system_time_std_dev);
-    printf("Average Queue Wait Time:           %.6g sec\n", avg_queue_wait_time);
+    printf("Average Inter-arrival Time:        %.3g sec\n", avg_inter_arrival_time);
+    printf("Average System Time:               %.3g sec\n", avg_system_time);
+    printf("System Time Standard Deviation:    %.3g sec\n", system_time_std_dev);
+    printf("Average Queue Wait Time:           %.3g sec\n", avg_queue_wait_time);
     printf("\n");
     printf("--- Queue Statistics ---\n");
-    printf("Average Queue Length:              %.6g jobs\n", avg_queue_length);
+    printf("Average Queue Length:              %.3g jobs\n", avg_queue_length);
     printf("Maximum Queue Length:              %u jobs\n", stats->max_job_queue_length);
     printf("\n");
     printf("--- Printer Statistics ---\n");
@@ -268,14 +268,14 @@ void log_statistics(SimulationStatistics* stats) {
     printf("Total Paper Used by Printer 1:     %d\n", stats->printer1_paper_used);
     printf("Jobs Served by Printer 2:          %.0f\n", stats->jobs_served_by_printer2);
     printf("Total Paper Used by Printer 2:     %d\n", stats->printer2_paper_used);
-    printf("Avg Service Time (Printer 1):      %.6g sec\n", avg_service_time_p1);
-    printf("Avg Service Time (Printer 2):      %.6g sec\n", avg_service_time_p2);
-    printf("Utilization (Printer 1):           %.6g%%\n", utilization_p1 * 100);
-    printf("Utilization (Printer 2):           %.6g%%\n", utilization_p2 * 100);
+    printf("Avg Service Time (Printer 1):      %.3g sec\n", avg_service_time_p1);
+    printf("Avg Service Time (Printer 2):      %.3g sec\n", avg_service_time_p2);
+    printf("Utilization (Printer 1):           %.3g%%\n", utilization_p1 * 100);
+    printf("Utilization (Printer 2):           %.3g%%\n", utilization_p2 * 100);
     printf("\n");
     printf("--- Paper Management ---\n");
     printf("Paper Refill Events:               %.0f\n", stats->paper_refill_events);
-    printf("Total Refill Service Time:         %.6g sec\n", stats->total_refill_service_time_us / 1000000.0);
+    printf("Total Refill Service Time:         %.3g sec\n", stats->total_refill_service_time_us / 1000000.0);
     printf("Papers Refilled:                   %d\n", stats->papers_refilled);
     printf("=========================================================\n");
     
