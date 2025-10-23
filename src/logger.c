@@ -195,24 +195,24 @@ void log_paper_empty(Printer* printer, int job_id, unsigned long current_time_us
 }
 
 void log_paper_refill_start(Printer* printer, int papers_needed, 
-    int time_to_refill_ms, unsigned long current_time_us)
+    int time_to_refill_us, unsigned long current_time_us)
 {
     flockfile(stdout);
     log_time(current_time_us, reference_time_us);
-    int time_ms = time_to_refill_ms / 1000;
-    int time_us = time_to_refill_ms % 1000;
+    int time_ms = time_to_refill_us / 1000;
+    int time_us = time_to_refill_us % 1000;
     printf("printer%d starts refilling %d papers, estimated time = %d.%03dms\n",
         printer->id, papers_needed, time_ms, time_us);
     funlockfile(stdout);
 }
 
-void log_paper_refill_end(Printer* printer, int refill_duration_ms,
+void log_paper_refill_end(Printer* printer, int refill_duration_us,
     unsigned long current_time_us)
 {
     flockfile(stdout);
     log_time(current_time_us, reference_time_us);
-    int time_ms = refill_duration_ms / 1000;
-    int time_us = refill_duration_ms % 1000;
+    int time_ms = refill_duration_us / 1000;
+    int time_us = refill_duration_us % 1000;
     printf("printer%d finishes refilling paper, actual time = %d.%03d ms\n",
         printer->id, time_ms, time_us);
     funlockfile(stdout);

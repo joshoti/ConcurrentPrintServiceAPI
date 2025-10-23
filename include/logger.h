@@ -102,18 +102,18 @@ void log_paper_empty(struct Printer* printer, int job_id, unsigned long current_
  *
  * @param printer The printer that is starting to refill paper.
  * @param papers_needed The number of papers needed to refill the printer to full capacity.
- * @param time_to_refill_ms The time it will take to refill the printer in milliseconds.
+ * @param time_to_refill_us The time it will take to refill the printer in microseconds.
  * @param current_time_us The current simulation time in microseconds.
  */
-void log_paper_refill_start(struct Printer* printer, int papers_needed, int time_to_refill_ms, unsigned long current_time_us);
+void log_paper_refill_start(struct Printer* printer, int papers_needed, int time_to_refill_us, unsigned long current_time_us);
 /**
  * @brief Logs an event when a printer finishes refilling paper.
  *
  * @param printer The printer that has finished refilling paper.
- * @param refill_duration_ms The duration of the refill in milliseconds.
+ * @param refill_duration_us The duration of the refill in microseconds.
  * @param current_time_us The current simulation time in microseconds.
  */
-void log_paper_refill_end(struct Printer* printer, int refill_duration_ms, unsigned long current_time_us);
+void log_paper_refill_end(struct Printer* printer, int refill_duration_us, unsigned long current_time_us);
 
 /**
  * @brief Logs an event when Ctrl+C is pressed to terminate the simulation.
