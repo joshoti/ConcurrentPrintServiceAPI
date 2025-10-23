@@ -59,10 +59,13 @@ void* paper_refiller_thread_func(void* arg) {
                 break; // there's work
             }
 
-            // Enable cancellation just before the cancellation point to avoid deadlock
-            // pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-            pthread_cond_wait(args->refill_supplier_cv, args->paper_refill_queue_mutex); // wait until signaled to refill paper
-            // pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+            /* 
+             * Disabling cancellation to avoid deadlock from thread
+             * being cancelled while holding mutex
+             *
+             * Wait until signaled to refill paper or terminate
+             */
+            pthread_cond_wait(args->refill_supplier_cv, args->paper_refill_queue_mutex);
         }
         unsigned long refill_start_time_us = get_time_in_us();
         ListNode* elem = list_pop_left(args->paper_refill_queue);
