@@ -138,13 +138,14 @@ void* job_receiver_thread_func(void* arg) {
         
         // Add job to queue
         job->queue_arrival_time_us = get_time_in_us();
+        unsigned long queue_last_interaction_time_us = job_queue->last_interaction_time_us;
         timed_queue_enqueue(job_queue, job);
         
         // Update statistics
         pthread_mutex_lock(stats_mutex);
         stats->max_job_queue_length = 
             (queue_length > stats->max_job_queue_length) ? (queue_length) : stats->max_job_queue_length;
-        log_queue_arrival(job, stats, job_queue);
+        log_queue_arrival(job, stats, job_queue, queue_last_interaction_time_us);
         pthread_mutex_unlock(stats_mutex);
         
         previous_job_arrival_time_us = job->system_arrival_time_us;

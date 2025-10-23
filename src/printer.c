@@ -85,10 +85,11 @@ void* printer_thread_func(void* arg) {
         }
 
         // Get the next job from the queue
+        unsigned long queue_last_interaction_time_us = args->job_queue->last_interaction_time_us;
         elem = timed_queue_dequeue_front(args->job_queue);
         Job* job = (Job*)elem->data;
         job->queue_departure_time_us = get_time_in_us();
-        log_queue_departure(job, args->stats, args->job_queue);
+        log_queue_departure(job, args->stats, args->job_queue, queue_last_interaction_time_us);
 
         pthread_mutex_unlock(args->job_queue_mutex);
 
