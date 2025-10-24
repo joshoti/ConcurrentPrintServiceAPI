@@ -32,10 +32,10 @@ static int is_exit_condition_met(int all_jobs_served) {
     return FALSE;
 }
 
-void* paper_refiller_thread_func(void* arg) {
+void* paper_refill_thread_func(void* arg) {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
     
-    PaperRefillerThreadArgs* args = (PaperRefillerThreadArgs*)arg;
+    PaperRefillThreadArgs* args = (PaperRefillThreadArgs*)arg;
 
     if (g_debug) printf("Paper refiller thread started\n");
     while (1) {

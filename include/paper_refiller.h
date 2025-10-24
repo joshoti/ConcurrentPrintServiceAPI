@@ -1,5 +1,5 @@
-#ifndef PAPER_REFILLER_H
-#define PAPER_REFILLER_H
+#ifndef PAPER_REFILL_H
+#define PAPER_REFILL_H
 
 #include <pthread.h>
 
@@ -15,11 +15,11 @@ struct SimulationStatistics;
  */
 void debug_refiller(int papers_supplied);
 
-// --- Paper Refiller Thread Arguments ---
+// --- Paper Refill Thread Arguments ---
 /**
  * @brief Arguments for the paper refiller thread.
  */
-typedef struct PaperRefillerThreadArgs {
+typedef struct PaperRefillThreadArgs {
     pthread_mutex_t* paper_refill_queue_mutex;
     pthread_mutex_t* stats_mutex;
     pthread_mutex_t* simulation_state_mutex; // protects g_terminate_now
@@ -29,15 +29,15 @@ typedef struct PaperRefillerThreadArgs {
     struct SimulationParameters* params;
     struct SimulationStatistics* stats;
     int* all_jobs_served;
-} PaperRefillerThreadArgs;
+} PaperRefillThreadArgs;
 
 // --- Thread function ---
 /**
  * @brief The main function for the paper refiller thread.
  *
- * @param arg Pointer to the PaperRefillerThreadArgs struct.
+ * @param arg Pointer to the PaperRefillThreadArgs struct.
  * @return NULL
  */
-void* paper_refiller_thread_func(void* arg);
+void* paper_refill_thread_func(void* arg);
 
-#endif // PAPER_REFILLER_H
+#endif // PAPER_REFILL_H

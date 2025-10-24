@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
         .printer = &printer2
     };
 
-    PaperRefillerThreadArgs paper_refiller_args = {
+    PaperRefillThreadArgs paper_refill_args = {
         .paper_refill_queue_mutex = &paper_refill_queue_mutex,
         .stats_mutex = &stats_mutex,
         .simulation_state_mutex = &simulation_state_mutex,
@@ -121,12 +121,15 @@ int main(int argc, char *argv[]) {
         .signal_set = &set,
         .job_queue_mutex = &job_queue_mutex,
         .simulation_state_mutex = &simulation_state_mutex,
+        .paper_refill_queue_mutex = &paper_refill_queue_mutex,
         .stats_mutex = &stats_mutex,
         .job_queue_not_empty_cv = &job_queue_not_empty_cv,
+        .refill_needed_cv = &refill_needed_cv,
+        .refill_supplier_cv = &refill_supplier_cv,
         .job_queue = &job_queue,
         .stats = &stats,
         .job_receiver_thread = &job_receiver_thread,
-        .paper_refiller_thread = &paper_refill_thread,
+        .paper_refill_thread = &paper_refill_thread,
         .all_jobs_arrived = &all_jobs_arrived
     };
 
@@ -139,7 +142,7 @@ int main(int argc, char *argv[]) {
     pthread_create(&job_receiver_thread, NULL, job_receiver_thread_func, &job_receiver_args);
 
     // 2) Paper refiller (services refill requests)
-    pthread_create(&paper_refill_thread, NULL, paper_refiller_thread_func, &paper_refiller_args);
+    pthread_create(&paper_refill_thread, NULL, paper_refill_thread_func, &paper_refill_args);
 
     // 3) Printers (consumers)
     pthread_create(&printer1_thread, NULL, printer_thread_func, &printer1_args);

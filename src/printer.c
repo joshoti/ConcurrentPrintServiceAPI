@@ -148,7 +148,7 @@ exit_printer:
     pthread_cond_broadcast(args->refill_supplier_cv); // Notify refill thread in case it's waiting
     pthread_cond_broadcast(args->refill_needed_cv); // Notify printer thread in case it's waiting
     pthread_mutex_unlock(args->paper_refill_queue_mutex);
-    pthread_cancel(*args->paper_refill_thread); // Cancel the paper refiller thread in case it's refilling a printer
+    pthread_cancel(*args->paper_refill_thread); // Cancel the paper refill thread in case it's refilling a printer
     if (g_debug) printf("Printer %d gracefully exited\n", args->printer->id);
     return NULL;
 }

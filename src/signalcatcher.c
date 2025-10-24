@@ -41,8 +41,8 @@ void* sig_int_catching_thread_func(void* arg) {
     pthread_mutex_unlock(args->stats_mutex);
     if (g_debug) printf("Canceling job receiver thread\n");
     if (args->job_receiver_thread) pthread_cancel(*args->job_receiver_thread);
-    if (g_debug) printf("Canceling paper refiller thread\n");
-    if (args->paper_refiller_thread) pthread_cancel(*args->paper_refiller_thread);
+    if (g_debug) printf("Canceling paper refill thread\n");
+    if (args->paper_refill_thread) pthread_cancel(*args->paper_refill_thread);
     
     // Lock both mutexes in a defined order to prevent deadlock
     pthread_mutex_lock(args->job_queue_mutex);

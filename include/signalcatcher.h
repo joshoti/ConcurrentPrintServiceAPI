@@ -28,11 +28,11 @@ typedef struct SignalCatchingThreadArgs {
     pthread_mutex_t* stats_mutex; // Mutex to protect statistics data structure
     pthread_cond_t* job_queue_not_empty_cv; // Condition variable to signal printer threads
     pthread_cond_t* refill_needed_cv; // Condition variable to signal printers waiting for paper
-    pthread_cond_t* refill_supplier_cv; // Condition variable to signal paper refiller thread
+    pthread_cond_t* refill_supplier_cv; // Condition variable to signal paper refill thread
     struct TimedQueue* job_queue; // Pointer to the job queue to be emptied
     struct SimulationStatistics* stats; // Simulation statistics to update
     pthread_t* job_receiver_thread; // Pointer to job receiver thread to cancel
-    pthread_t* paper_refiller_thread; // Pointer to paper refiller thread to cancel
+    pthread_t* paper_refill_thread; // Pointer to paper refill thread to cancel
     int* all_jobs_arrived; // Flag indicating if all jobs have arrived
 } SignalCatchingThreadArgs;
 
