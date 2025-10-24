@@ -10,7 +10,11 @@ int g_debug = 0;
 int g_terminate_now = 0;
 
 void usage() {
-    fprintf(stderr, "usage: ./cli [-debug] [-num num_jobs] [-q queue_capacity] [-p_cap printer_paper_capacity] [-arr arrival_rate] [-s service_rate] [-ref refill_rate] [-papers_lower papers_required_lower_bound] [-papers_upper papers_required_upper_bound]\n");
+    fprintf(stderr, "usage: ./bin/cli [-debug] [-help] [-num num_jobs] [-q queue_capacity]\n");
+    fprintf(stderr, "                 [-p_cap printer_paper_capacity] [-arr arrival_rate]\n");
+    fprintf(stderr, "                 [-s service_rate] [-ref refill_rate]\n");
+    fprintf(stderr, "                 [-papers_lower papers_required_lower_bound]\n");
+    fprintf(stderr, "                 [-papers_upper papers_required_upper_bound]\n");
 }
 
 int random_between(int lower, int upper) {
@@ -41,6 +45,11 @@ int is_positive_integer(const char* str, int value) {
 
 int process_args(int argc, char *argv[], SimulationParameters* params) {
     for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-help") == 0) {
+            usage();
+            exit(0); // successful early exit for help
+        }
+
         if (strcmp(argv[i], "-num") == 0) {
             params->num_jobs = atoi(argv[++i]);
             if (!is_positive_integer("num_jobs", params->num_jobs)) return FALSE;

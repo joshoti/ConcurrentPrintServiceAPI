@@ -3,3 +3,14 @@ This project is a simulation of a multithreaded printing service designed to dem
 
 ## Architecture
 ![Architecture diagram](docs/Architecture%20diagram.png)
+
+## Local Environment Setup
+To compile and run terminal version, execute the below command in the terminal window
+```sh
+make -s bin/cli && ./bin/cli
+```
+
+To see list of configurable options, execute the below command in the terminal window
+```sh
+make -s bin/cli && ./bin/cli -help
+```
