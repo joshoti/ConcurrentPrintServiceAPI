@@ -48,12 +48,18 @@ void* sig_int_catching_thread_func(void* arg) {
     pthread_mutex_lock(args->job_queue_mutex);
     pthread_mutex_lock(args->stats_mutex);
 
-    empty_queue_if_terminating(args->job_queue, args->stats);
-    pthread_cond_broadcast(args->job_queue_not_empty_cv);
+    empty_queue_if_terminating(args->job_queue, args->stats); // empty job queue
+    pthread_cond_broadcast(args->job_queue_not_empty_cv); // wake up printer threads to let them exit
 
     // Unlock in reverse order
     pthread_mutex_unlock(args->stats_mutex);
     pthread_mutex_unlock(args->job_queue_mutex);
+
+    // Wake up any printers or refiller that might be waiting
+    pthread_mutex_lock(args->paper_refill_queue_mutex);
+    pthread_cond_broadcast(args->refill_needed_cv); // wake up printer threads to let them exit if needed
+    pthread_cond_broadcast(args->refill_supplier_cv); // wake up refiller thread to let it exit if needed
+    pthread_mutex_unlock(args->paper_refill_queue_mutex);
     if (g_debug) printf("Signal handler exiting\n");
 
     pthread_exit((void*)1);
