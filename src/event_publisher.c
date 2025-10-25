@@ -4,8 +4,9 @@
 #include "event_publisher.h"
 #include "preprocessing.h"
 #include "timeutils.h"
-#include "civetweb.h"
+#include "mongoose.h"
 #include "simulation_stats.h"
+#include "ws_bridge.h"
 #include "job_receiver.h"
 #include "linked_list.h"
 #include "timed_queue.h"
@@ -33,7 +34,7 @@ static void write_time_to_buffer(unsigned long time_us, unsigned long reference_
     sprintf(buf, time_format, milliseconds, microseconds);
 }
 
-void publish_simulation_parameters(const SimulationParameters* params, struct mg_connection* ws_conn) {
+void publish_simulation_parameters(const SimulationParameters* params) {
     char buf[1024];
     sprintf(buf, "{\"type\":\"params\", \"params\": {\"job_arrival_time\":%.6g,\
         \"printing_rate\":%.6g, \"queue_capacity\":%d,\
@@ -42,12 +43,11 @@ void publish_simulation_parameters(const SimulationParameters* params, struct mg
             params->job_arrival_time_us / 1000.0, params->printing_rate, params->queue_capacity,
             params->printer_paper_capacity, params->refill_rate, params->num_jobs,
             params->papers_required_lower_bound, params->papers_required_upper_bound);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    // sending via bridge on the Mongoose loop
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_simulation_start(SimulationStatistics* stats, struct mg_connection* ws_conn) {
+void publish_simulation_start(SimulationStatistics* stats) {
     reference_time_us = get_time_in_us();
     stats->simulation_start_time_us = reference_time_us;
     char time_buf[64];
@@ -55,14 +55,10 @@ void publish_simulation_start(SimulationStatistics* stats, struct mg_connection*
 
     write_time_to_buffer(reference_time_us, reference_time_us, time_buf);
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s simulation begins\"}", time_buf);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
-    return reference_time_us;
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_simulation_end(SimulationStatistics* stats,
-    struct mg_connection* ws_conn)
+void publish_simulation_end(SimulationStatistics* stats)
 {
     reference_end_time_us = get_time_in_us();
     char time_buf[64];
@@ -70,11 +66,9 @@ void publish_simulation_end(SimulationStatistics* stats,
 
     write_time_to_buffer(reference_end_time_us, reference_time_us, time_buf);
     stats->simulation_duration_us = reference_end_time_us - reference_time_us;
-    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s simulation ends, duration = %d.%03dms\"}",
+    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s simulation ends, duration = %lu.%03lums\"}",
         time_buf, stats->simulation_duration_us / 1000, stats->simulation_duration_us % 1000);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
 
@@ -87,11 +81,10 @@ void publish_simulation_end(SimulationStatistics* stats,
  * @param current_job_arrival_time_us The current simulation time in microseconds.
  * @param is_dropped Whether the job was dropped (TRUE) or created (FALSE).
  * @param stats The simulation statistics to update.
- * @param ws_conn The WebSocket connection to publish the event to.
  */
 static void job_arrival_helper(int job_id, int papers_required,
     unsigned long previous_job_arrival_time_us, unsigned long current_job_arrival_time_us,
-    int is_dropped, SimulationStatistics* stats, struct mg_connection* ws_conn)
+    int is_dropped, SimulationStatistics* stats)
 {
     char time_buf[64];
     char buf[1024];
@@ -107,30 +100,27 @@ static void job_arrival_helper(int job_id, int papers_required,
         time_buf, job_id, papers_required,
         papers_required == 1 ? "" : "s", time_in_ms, time_in_us,
         is_dropped ? ", dropped" : "");
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
 void publish_system_arrival(Job* job, unsigned long previous_job_arrival_time_us,
-    SimulationStatistics* stats, struct mg_connection* ws_conn)
+    SimulationStatistics* stats)
 {
     job_arrival_helper(job->id, job->papers_required,
         previous_job_arrival_time_us, job->system_arrival_time_us, FALSE,
-        stats, ws_conn);
+        stats);
 }
 
 void publish_dropped_job(Job* job, unsigned long previous_job_arrival_time_us,
-    SimulationStatistics* stats, struct mg_connection* ws_conn)
+    SimulationStatistics* stats)
 {
     stats->total_jobs_dropped += 1; // stats: total jobs dropped
     job_arrival_helper(job->id, job->papers_required,
         previous_job_arrival_time_us, job->system_arrival_time_us, TRUE,
-        stats, ws_conn);
+        stats);
 }
 
-void publish_removed_job(Job* job, struct mg_connection* ws_conn)
-{
+void publish_removed_job(Job* job) {
     unsigned long current_time_us = get_time_in_us();
     char time_buf[64];
     char buf[1024];
@@ -138,14 +128,11 @@ void publish_removed_job(Job* job, struct mg_connection* ws_conn)
     write_time_to_buffer(current_time_us, reference_time_us, time_buf);
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s job%d removed from system\"}",
         time_buf, job->id);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
 void publish_queue_arrival(const Job* job, SimulationStatistics* stats,
-    TimedQueue* job_queue, unsigned long last_interaction_time_us,
-    struct mg_connection* ws_conn)
+    TimedQueue* job_queue, unsigned long last_interaction_time_us)
 {
     stats->area_num_in_job_queue_us +=
         (job->queue_arrival_time_us - last_interaction_time_us) * // duration of previous state
@@ -159,14 +146,11 @@ void publish_queue_arrival(const Job* job, SimulationStatistics* stats,
 
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s job%d enters queue, queue length = %d\"}",
         time_buf, job->id, timed_queue_length(job_queue));
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
 void publish_queue_departure(const Job* job, SimulationStatistics* stats,
-    TimedQueue* job_queue, unsigned long last_interaction_time_us,
-    struct mg_connection* ws_conn)
+    TimedQueue* job_queue, unsigned long last_interaction_time_us)
 {
     stats->area_num_in_job_queue_us +=
         (job->queue_departure_time_us - last_interaction_time_us) * // duration of previous state
@@ -183,26 +167,21 @@ void publish_queue_departure(const Job* job, SimulationStatistics* stats,
     int time_us = queue_duration % 1000;
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s job%d leaves queue, time in queue = %d.%03dms, queue_length = %d\"}",
         time_buf, job->id, time_ms, time_us, timed_queue_length(job_queue));
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_printer_arrival(const Job* job, const Printer* printer,
-    struct mg_connection* ws_conn)
+void publish_printer_arrival(const Job* job, const Printer* printer)
 {
     char time_buf[64];
     char buf[1024];
     write_time_to_buffer(job->service_arrival_time_us, reference_time_us, time_buf);
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s job%d begins service at printer%d, printing %d pages in about %dms\"}",
         time_buf, job->id, printer->id, job->papers_required, job->service_time_requested_ms);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
 void publish_system_departure(const Job* job, const Printer* printer,
-    SimulationStatistics* stats, struct mg_connection* ws_conn)
+    SimulationStatistics* stats)
 {
     char time_buf[64];
     char buf[1024];
@@ -228,26 +207,21 @@ void publish_system_departure(const Job* job, const Printer* printer,
     int time_us = service_duration % 1000;
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s job%d departs from printer%d, service time = %d.%03dms\"}",
         time_buf, job->id, printer->id, time_ms, time_us);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_paper_empty(Printer* printer, int job_id, unsigned long current_time_us,
-    struct mg_connection* ws_conn)
+void publish_paper_empty(Printer* printer, int job_id, unsigned long current_time_us)
 {
     char time_buf[64];
     char buf[1024];
     write_time_to_buffer(current_time_us, reference_time_us, time_buf);
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d does not have enough paper for job%d and is requesting refill\"}",
         time_buf, printer->id, job_id);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
 void publish_paper_refill_start(Printer* printer, int papers_needed,
-    int time_to_refill_us, unsigned long current_time_us, struct mg_connection* ws_conn)
+    int time_to_refill_us, unsigned long current_time_us)
 {
     char time_buf[64];
     char buf[1024];
@@ -256,13 +230,11 @@ void publish_paper_refill_start(Printer* printer, int papers_needed,
     int time_us = time_to_refill_us % 1000;
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d starts refilling %d papers, estimated time = %d.%03dms\"}",
         time_buf, printer->id, papers_needed, time_ms, time_us);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
 void publish_paper_refill_end(Printer* printer, int refill_duration_us,
-    unsigned long current_time_us, struct mg_connection* ws_conn)
+    unsigned long current_time_us)
 {
     char time_buf[64];
     char buf[1024];
@@ -271,32 +243,26 @@ void publish_paper_refill_end(Printer* printer, int refill_duration_us,
     int time_us = refill_duration_us % 1000;
     sprintf(buf, "{\"type\":\"log\", \"message\":\"%s printer%d finishes refilling, actual time = %d.%03dms\"}",
         time_buf, printer->id, time_ms, time_us);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_simulation_stopped(SimulationStatistics* stats, struct mg_connection* ws_conn) {
+void publish_simulation_stopped(SimulationStatistics* stats) {
     char time_buf[64];
     char buf[1024];
     reference_end_time_us = get_time_in_us();
 
     write_time_to_buffer(reference_end_time_us, reference_time_us, time_buf);
     stats->simulation_duration_us = reference_end_time_us - reference_time_us;
-    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s simulation stopped, duration = %d.%03dms\"}",
+    sprintf(buf, "{\"type\":\"log\", \"message\":\"%s simulation stopped, duration = %lu.%03lums\"}",
         time_buf, stats->simulation_duration_us / 1000, stats->simulation_duration_us % 1000);
-    if (ws_conn) {
-        mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-    }
+    ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_statistics(SimulationStatistics* stats, struct mg_connection* ws_conn) {
+void publish_statistics(SimulationStatistics* stats) {
     if (stats == NULL) return;
 
     char buf[4096];
     if (write_statistics_to_buffer(stats, buf, sizeof(buf)) > 0) {
-        if (ws_conn) {
-            mg_websocket_write(ws_conn, MG_WEBSOCKET_OPCODE_TEXT, buf, strlen(buf));
-        }
+        ws_bridge_send_json_from_any_thread(buf, strlen(buf));
     }
 }

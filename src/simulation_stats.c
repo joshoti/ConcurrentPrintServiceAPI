@@ -3,7 +3,6 @@
 #include <math.h>
 #include <pthread.h>
 #include "simulation_stats.h"
-#include "civetweb.h"
 
 // --- Private Helper Functions ---
 /**
