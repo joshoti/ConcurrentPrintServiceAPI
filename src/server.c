@@ -104,6 +104,7 @@ static void destroy_context(SimulationContext* ctx) {
 }
 
 static void* simulation_runner(void* arg) {
+    if (g_debug) printf("Simulation runner thread started\n");
 	SimulationContext* ctx = (SimulationContext*)arg;
 
 	// Prepare thread args
@@ -182,6 +183,7 @@ static void* simulation_runner(void* arg) {
 	pthread_mutex_lock(&g_server_state_mutex);
 	ctx->is_running = 0;
 	pthread_mutex_unlock(&g_server_state_mutex);
+    if (g_debug) printf("Simulation runner thread finished\n");
 	return NULL;
 }
 
@@ -321,6 +323,14 @@ int main(int argc, char *argv[]) {
 	log_router_set_publisher_backend(&pubs);
 
 	mg_mgr_init(&g_mgr); // Initialise event manager
+
+	// Initialise wakeup pipe for cross-thread notifications
+	if (!mg_wakeup_init(&g_mgr)) {
+		fprintf(stderr, "Failed to initialise Mongoose wakeup pipe\n");
+		mg_mgr_free(&g_mgr);
+		destroy_context(&g_ctx);
+		return 1;
+	}
 
     // Create HTTP listener
 	if (mg_http_listen(&g_mgr, s_listen_on, fn, NULL) == NULL) {
