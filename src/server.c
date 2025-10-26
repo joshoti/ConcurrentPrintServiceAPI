@@ -41,7 +41,6 @@ typedef struct SimulationContext {
 	pthread_t printer2_thread;
 	pthread_t job_receiver_thread;
 	pthread_t paper_refill_thread;
-	pthread_t signal_catching_thread;
 	pthread_t simulation_runner_thread; // background wrapper
 
 	// Sync primitives
@@ -66,7 +65,6 @@ typedef struct SimulationContext {
 	PrinterThreadArgs printer1_args;
 	PrinterThreadArgs printer2_args;
 	PaperRefillThreadArgs paper_refill_args;
-	SignalCatchingThreadArgs signal_catching_args;
 
 	// Control
 	int is_running;
@@ -107,12 +105,6 @@ static void destroy_context(SimulationContext* ctx) {
 
 static void* simulation_runner(void* arg) {
 	SimulationContext* ctx = (SimulationContext*)arg;
-
-	// Block SIGINT in this process and use our signal catcher thread
-	sigset_t set;
-	sigemptyset(&set);
-	sigaddset(&set, SIGINT);
-	sigprocmask(SIG_BLOCK, &set, (sigset_t*)0);
 
 	// Prepare thread args
 	JobThreadArgs job_receiver_args = {
@@ -167,23 +159,6 @@ static void* simulation_runner(void* arg) {
 	};
 	ctx->paper_refill_args = paper_refill_args;
 
-	SignalCatchingThreadArgs signal_catching_args = {
-		.signal_set = &set,
-		.job_queue_mutex = &ctx->job_queue_mutex,
-		.simulation_state_mutex = &ctx->simulation_state_mutex,
-		.paper_refill_queue_mutex = &ctx->paper_refill_queue_mutex,
-		.stats_mutex = &ctx->stats_mutex,
-		.job_queue_not_empty_cv = &ctx->job_queue_not_empty_cv,
-		.refill_needed_cv = &ctx->refill_needed_cv,
-		.refill_supplier_cv = &ctx->refill_supplier_cv,
-		.job_queue = &ctx->job_queue,
-		.stats = &ctx->stats,
-		.job_receiver_thread = &ctx->job_receiver_thread,
-		.paper_refill_thread = &ctx->paper_refill_thread,
-		.all_jobs_arrived = &ctx->all_jobs_arrived
-	};
-	ctx->signal_catching_args = signal_catching_args;
-
 	// Start of simulation logging
 	emit_simulation_parameters(&ctx->params);
 	emit_simulation_start(&ctx->stats);
@@ -193,15 +168,12 @@ static void* simulation_runner(void* arg) {
 	pthread_create(&ctx->paper_refill_thread, NULL, paper_refill_thread_func, &ctx->paper_refill_args);
 	pthread_create(&ctx->printer1_thread, NULL, printer_thread_func, &ctx->printer1_args);
 	pthread_create(&ctx->printer2_thread, NULL, printer_thread_func, &ctx->printer2_args);
-	pthread_create(&ctx->signal_catching_thread, NULL, sig_int_catching_thread_func, &ctx->signal_catching_args);
 
 	// Join threads
 	pthread_join(ctx->job_receiver_thread, NULL);
 	pthread_join(ctx->printer1_thread, NULL);
 	pthread_join(ctx->printer2_thread, NULL);
 	pthread_join(ctx->paper_refill_thread, NULL);
-	pthread_cancel(ctx->signal_catching_thread);
-	pthread_join(ctx->signal_catching_thread, NULL);
 
 	// Final logging
 	emit_simulation_end(&ctx->stats);
@@ -235,6 +207,9 @@ static void request_stop_simulation(SimulationContext* ctx) {
 	emit_simulation_stopped(&ctx->stats);
 	pthread_mutex_unlock(&ctx->stats_mutex);
 
+    pthread_cancel(ctx->job_receiver_thread);
+    pthread_cancel(ctx->paper_refill_thread);
+
 	// Lock in defined order and empty queue
 	pthread_mutex_lock(&ctx->job_queue_mutex);
 	pthread_mutex_lock(&ctx->stats_mutex);
@@ -242,6 +217,12 @@ static void request_stop_simulation(SimulationContext* ctx) {
 	pthread_cond_broadcast(&ctx->job_queue_not_empty_cv);
 	pthread_mutex_unlock(&ctx->stats_mutex);
 	pthread_mutex_unlock(&ctx->job_queue_mutex);
+
+    // Wake up any printers or refiller that might be waiting
+    pthread_mutex_lock(&ctx->paper_refill_queue_mutex);
+    pthread_cond_broadcast(&ctx->refill_needed_cv);
+    pthread_cond_broadcast(&ctx->refill_supplier_cv);
+    pthread_mutex_unlock(&ctx->paper_refill_queue_mutex);
 }
 
 // Helper to compare incoming ws message with a C string literal
