@@ -38,7 +38,7 @@ void* sig_int_catching_thread_func(void* arg) {
     pthread_mutex_unlock(args->simulation_state_mutex);
 
     pthread_mutex_lock(args->stats_mutex);
-    log_ctrl_c_pressed(args->stats);
+    emit_simulation_stopped(args->stats);
     pthread_mutex_unlock(args->stats_mutex);
     if (g_debug) printf("Canceling job receiver thread\n");
     if (args->job_receiver_thread) pthread_cancel(*args->job_receiver_thread);

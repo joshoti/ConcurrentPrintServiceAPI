@@ -128,7 +128,7 @@ void emit_paper_refill_end(struct Printer* printer, int refill_duration_us,
     }
 }
 
-void emit_ctrl_c_pressed(struct SimulationStatistics* stats) {
+void emit_simulation_stopped(struct SimulationStatistics* stats) {
     if (g_log_mode == LOG_MODE_SERVER && g_publisher.publish_simulation_stopped) {
         g_publisher.publish_simulation_stopped(stats);
     } else if (g_logger.log_ctrl_c_pressed) {

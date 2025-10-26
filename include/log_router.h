@@ -107,7 +107,7 @@ void emit_paper_refill_start(struct Printer* printer, int papers_needed,
                              int time_to_refill_us, unsigned long current_time_us);
 void emit_paper_refill_end(struct Printer* printer, int refill_duration_us,
                            unsigned long current_time_us);
-void emit_ctrl_c_pressed(struct SimulationStatistics* stats);
+void emit_simulation_stopped(struct SimulationStatistics* stats);
 void emit_statistics(struct SimulationStatistics* stats);
 
 #endif // LOG_ROUTER_H
