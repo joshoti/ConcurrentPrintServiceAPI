@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+
 #include "preprocessing.h"
 #include "common.h"
 #include "timeutils.h"
-#include "logger.h"
+#include "log_router.h"
 #include "simulation_stats.h"
 #include "linked_list.h"
 #include "timed_queue.h"
@@ -65,7 +66,7 @@ void* printer_thread_func(void* arg) {
             pthread_mutex_unlock(args->job_queue_mutex);
             pthread_mutex_lock(args->paper_refill_queue_mutex);
             unsigned long refill_start_time_us = get_time_in_us();
-            log_paper_empty(args->printer, job_to_dequeue->id, refill_start_time_us);
+            emit_paper_empty(args->printer, job_to_dequeue->id, refill_start_time_us);
             list_append(args->paper_refill_queue, args->printer);
             pthread_cond_broadcast(args->refill_supplier_cv); // Notify refill thread
             
@@ -92,7 +93,7 @@ void* printer_thread_func(void* arg) {
         elem = timed_queue_dequeue_front(args->job_queue);
         Job* job = (Job*)elem->data;
         job->queue_departure_time_us = get_time_in_us();
-        log_queue_departure(job, args->stats, args->job_queue, queue_last_interaction_time_us);
+        emit_queue_departure(job, args->stats, args->job_queue, queue_last_interaction_time_us);
 
         pthread_mutex_unlock(args->job_queue_mutex);
 
@@ -102,7 +103,7 @@ void* printer_thread_func(void* arg) {
 
         // Log job arrival at printer
         job->service_arrival_time_us = get_time_in_us();
-        log_printer_arrival(job, args->printer);
+        emit_printer_arrival(job, args->printer);
 
         // Service the job
         usleep(job->service_time_requested_ms * 1000); // Convert ms to us
@@ -116,7 +117,7 @@ void* printer_thread_func(void* arg) {
         pthread_mutex_lock(args->stats_mutex);
         args->printer->jobs_printed_count++;
         // Log job departure from system and update stats
-        log_system_departure(job, args->printer, args->stats);
+        emit_system_departure(job, args->printer, args->stats);
         pthread_mutex_unlock(args->stats_mutex);
 
         // Free job resources

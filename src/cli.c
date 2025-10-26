@@ -4,14 +4,15 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+
 #include "linked_list.h"
 #include "timed_queue.h"
 #include "job_receiver.h"
 #include "paper_refiller.h"
 #include "printer.h"
 #include "common.h"
-#include "civetweb.h"
 #include "preprocessing.h"
+#include "log_router.h"
 #include "logger.h"
 #include "simulation_stats.h"
 #include "signalcatcher.h"
@@ -133,9 +134,30 @@ int main(int argc, char *argv[]) {
         .all_jobs_arrived = &all_jobs_arrived
     };
 
+    // Bind logger backend for terminal mode
+    struct LoggerBackend logs = {
+        .log_simulation_parameters = log_simulation_parameters,
+        .log_simulation_start = log_simulation_start,
+        .log_simulation_end = log_simulation_end,
+        .log_system_arrival = log_system_arrival,
+        .log_dropped_job = log_dropped_job,
+        .log_removed_job = log_removed_job,
+        .log_queue_arrival = log_queue_arrival,
+        .log_queue_departure = log_queue_departure,
+        .log_printer_arrival = log_printer_arrival,
+        .log_system_departure = log_system_departure,
+        .log_paper_empty = log_paper_empty,
+        .log_paper_refill_start = log_paper_refill_start,
+        .log_paper_refill_end = log_paper_refill_end,
+        .log_ctrl_c_pressed = log_ctrl_c_pressed,
+        .log_statistics = log_statistics,
+    };
+    log_router_set_logger_backend(&logs);
+    // Terminal mode: print to stdout
+    set_log_mode(LOG_MODE_TERMINAL);
     // --- Start of simulation logging ---
-    log_simulation_parameters(&params);
-    log_simulation_start(&stats);
+    emit_simulation_parameters(&params);
+    emit_simulation_start(&stats);
 
     // --- Create threads in order ---
     // 1) Job receiver (produces jobs)
@@ -172,8 +194,8 @@ int main(int argc, char *argv[]) {
     if (g_debug) printf("signal catching thread joined\n");
 
     // --- Final logging ---
-    log_simulation_end(&stats);
-    log_statistics(&stats);
+    emit_simulation_end(&stats);
+    emit_statistics(&stats);
 
     // --- Cleanup synchronization primitives ---
     pthread_mutex_destroy(&job_queue_mutex);

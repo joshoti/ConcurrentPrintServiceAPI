@@ -18,13 +18,14 @@
 #include "printer.h"
 #include "event_publisher.h"
 #include "ws_bridge.h"
+#include "log_router.h"
 #include "simulation_stats.h"
 #include "signalcatcher.h"
 
 // Default listen address and websocket paths
 static const char *s_listen_on = "http://127.0.0.1:8000";
 static const char *s_ws_path_primary = "/websocket";
-static const char *s_web_root = "./src";
+static const char *s_web_root = "./tests";
 
 // Mongoose manager and active websocket tracking
 static struct mg_mgr g_mgr; // used for mg_wakeup
@@ -184,8 +185,8 @@ static void* simulation_runner(void* arg) {
 	ctx->signal_catching_args = signal_catching_args;
 
 	// Start of simulation logging
-	publish_simulation_parameters(&ctx->params);
-	publish_simulation_start(&ctx->stats);
+	emit_simulation_parameters(&ctx->params);
+	emit_simulation_start(&ctx->stats);
 
 	// Create threads
 	pthread_create(&ctx->job_receiver_thread, NULL, job_receiver_thread_func, &ctx->job_receiver_args);
@@ -203,8 +204,8 @@ static void* simulation_runner(void* arg) {
 	pthread_join(ctx->signal_catching_thread, NULL);
 
 	// Final logging
-	publish_simulation_end(&ctx->stats);
-	publish_statistics(&ctx->stats);
+	emit_simulation_end(&ctx->stats);
+	emit_statistics(&ctx->stats);
 
 	pthread_mutex_lock(&g_server_state_mutex);
 	ctx->is_running = 0;
@@ -231,7 +232,7 @@ static void request_stop_simulation(SimulationContext* ctx) {
 	pthread_mutex_unlock(&ctx->simulation_state_mutex);
 
 	pthread_mutex_lock(&ctx->stats_mutex);
-	publish_simulation_stopped(&ctx->stats);
+	emit_ctrl_c_pressed(&ctx->stats);
 	pthread_mutex_unlock(&ctx->stats_mutex);
 
 	// Lock in defined order and empty queue

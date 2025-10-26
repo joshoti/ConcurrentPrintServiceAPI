@@ -2,8 +2,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "common.h"
-#include "logger.h"
+#include "log_router.h"
 #include "timeutils.h"
 #include "job_receiver.h"
 #include "linked_list.h"
@@ -19,7 +20,7 @@ void empty_queue_if_terminating(TimedQueue* queue, SimulationStatistics* stats) 
         ListNode* curr = timed_queue_dequeue_front(queue);
         Job* job = (Job*)curr->data;
         job->queue_departure_time_us = get_time_in_us();
-        log_removed_job(job);
+        emit_removed_job(job);
         free(curr);
         free(job);
         stats->total_jobs_removed++;

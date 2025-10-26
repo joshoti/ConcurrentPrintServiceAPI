@@ -3,13 +3,14 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+
 #include "common.h"
 #include "job_receiver.h"
 #include "preprocessing.h"
 #include "linked_list.h"
 #include "timed_queue.h"
 #include "timeutils.h"
-#include "logger.h"
+#include "log_router.h"
 #include "simulation_stats.h"
 
 extern int g_terminate_now;
@@ -40,7 +41,7 @@ void drop_job_from_system(Job* job, unsigned long previous_job_arrival_time_us, 
     if (job == NULL) return;
     
     // Log the dropped job (this will update statistics internally)
-    log_dropped_job(job, previous_job_arrival_time_us, stats);
+    emit_dropped_job(job, previous_job_arrival_time_us, stats);
 
     // Free the job memory
     free(job);
@@ -116,7 +117,7 @@ void* job_receiver_thread_func(void* arg) {
         // Set system arrival time
         job->system_arrival_time_us = get_time_in_us();
         pthread_mutex_lock(stats_mutex);
-        log_system_arrival(job, previous_job_arrival_time_us, stats);
+        emit_system_arrival(job, previous_job_arrival_time_us, stats);
         pthread_mutex_unlock(stats_mutex);
         
         // Check if job should be dropped (e.g., if queue is full)
@@ -145,7 +146,7 @@ void* job_receiver_thread_func(void* arg) {
         pthread_mutex_lock(stats_mutex);
         stats->max_job_queue_length = 
             (queue_length > stats->max_job_queue_length) ? (queue_length) : stats->max_job_queue_length;
-        log_queue_arrival(job, stats, job_queue, queue_last_interaction_time_us);
+        emit_queue_arrival(job, stats, job_queue, queue_last_interaction_time_us);
         pthread_mutex_unlock(stats_mutex);
         
         previous_job_arrival_time_us = job->system_arrival_time_us;
