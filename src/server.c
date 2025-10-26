@@ -232,7 +232,7 @@ static void request_stop_simulation(SimulationContext* ctx) {
 	pthread_mutex_unlock(&ctx->simulation_state_mutex);
 
 	pthread_mutex_lock(&ctx->stats_mutex);
-	emit_ctrl_c_pressed(&ctx->stats);
+	emit_simulation_stopped(&ctx->stats);
 	pthread_mutex_unlock(&ctx->stats_mutex);
 
 	// Lock in defined order and empty queue
@@ -315,6 +315,29 @@ int main(int argc, char *argv[]) {
 	// Initialize context and process args
 	init_context(&g_ctx);
 	if (!process_args(argc, argv, &g_ctx.params)) return 1;
+
+	// Server mode: send over websocket
+	set_log_mode(LOG_MODE_SERVER);
+
+    // Bind publisher backend so the router can call them without a hard dependency in CLI
+    struct PublisherBackend pubs = {
+		.publish_simulation_parameters = publish_simulation_parameters,
+		.publish_simulation_start = publish_simulation_start,
+		.publish_simulation_end = publish_simulation_end,
+		.publish_system_arrival = publish_system_arrival,
+		.publish_dropped_job = publish_dropped_job,
+		.publish_removed_job = publish_removed_job,
+		.publish_queue_arrival = publish_queue_arrival,
+		.publish_queue_departure = publish_queue_departure,
+		.publish_printer_arrival = publish_printer_arrival,
+		.publish_system_departure = publish_system_departure,
+		.publish_paper_empty = publish_paper_empty,
+		.publish_paper_refill_start = publish_paper_refill_start,
+		.publish_paper_refill_end = publish_paper_refill_end,
+		.publish_simulation_stopped = publish_simulation_stopped,
+		.publish_statistics = publish_statistics,
+	};
+	log_router_set_publisher_backend(&pubs);
 
 	mg_mgr_init(&g_mgr); // Initialise event manager
 
