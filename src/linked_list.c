@@ -3,15 +3,15 @@
 #include "linked_list.h"
 
 
-int list_length(LinkedList* list) {
+int list_length(linked_list_t* list) {
     return list->members_count;
 }
-int list_is_empty(LinkedList* list) {
+int list_is_empty(linked_list_t* list) {
     return list->members_count == 0;
 }
 
-int list_append(LinkedList* list, void* obj) {
-    ListNode* newNode = (ListNode*) malloc(sizeof(ListNode));
+int list_append(linked_list_t* list, void* obj) {
+    list_node_t* newNode = (list_node_t*) malloc(sizeof(list_node_t));
     if (newNode == NULL) {
         return FALSE; // Memory allocation failure
     }
@@ -26,8 +26,8 @@ int list_append(LinkedList* list, void* obj) {
     return TRUE;
 }
 
-int list_append_left(LinkedList* list, void* obj) {
-    ListNode* newNode = (ListNode*) malloc(sizeof(ListNode));
+int list_append_left(linked_list_t* list, void* obj) {
+    list_node_t* newNode = (list_node_t*) malloc(sizeof(list_node_t));
     if (newNode == NULL) {
         return FALSE; // Memory allocation failure
     }
@@ -41,29 +41,29 @@ int list_append_left(LinkedList* list, void* obj) {
 
     return TRUE;
 }
-ListNode* list_pop(LinkedList* list) {
+list_node_t* list_pop(linked_list_t* list) {
     if (list_is_empty(list)) {
         return NULL;
     }
-    ListNode* last = list->tail.prev;
+    list_node_t* last = list->tail.prev;
     last->prev->next = &list->tail;
     list->tail.prev = last->prev;
     list->members_count--;
     return last;
 }
 
-ListNode* list_pop_left(LinkedList* list) {
+list_node_t* list_pop_left(linked_list_t* list) {
     if (list_is_empty(list)) {
         return NULL;
     }
-    ListNode* first = list->head.next;
+    list_node_t* first = list->head.next;
     first->next->prev = &list->head;
     list->head.next = first->next;
     list->members_count--;
     return first;
 }
 
-void list_remove(LinkedList* list, ListNode* node) {
+void list_remove(linked_list_t* list, list_node_t* node) {
     if (node == NULL || list_is_empty(list)) {
         return;
     }
@@ -73,29 +73,29 @@ void list_remove(LinkedList* list, ListNode* node) {
     free(node);
 }
 
-void list_clear(LinkedList* list) {
+void list_clear(linked_list_t* list) {
     while (!list_is_empty(list)) {
-        ListNode* node = list_pop_left(list);
+    list_node_t* node = list_pop_left(list);
         free(node);
     }
 }
 
-ListNode* list_first(LinkedList* list) {
+list_node_t* list_first(linked_list_t* list) {
     if (list_is_empty(list)) {
         return NULL;
     }
     return list->head.next;
 }
 
-ListNode* list_last(LinkedList* list) {
+list_node_t* list_last(linked_list_t* list) {
     if (list_is_empty(list)) {
         return NULL;
     }
     return list->tail.prev;
 }
 
-ListNode* list_find(LinkedList* list, void* data) {
-    ListNode* curr = NULL;
+list_node_t* list_find(linked_list_t* list, void* data) {
+    list_node_t* curr = NULL;
     for (curr = list_first(list); curr != NULL; curr = curr->next) {
         if (curr->data == data) {
             return curr;
@@ -104,7 +104,7 @@ ListNode* list_find(LinkedList* list, void* data) {
     return NULL;
 }
 
-int list_init(LinkedList* list) {
+int list_init(linked_list_t* list) {
     if (list == NULL) {
         return FALSE; // Invalid list pointer
     }

@@ -1,7 +1,7 @@
 #ifndef SIMULATION_STATS_H
 #define SIMULATION_STATS_H
 
-typedef struct SimulationStatistics {
+typedef struct simulation_statistics {
     // --- General Simulation Metrics ---
     unsigned long simulation_start_time_us;     // Start time of the simulation
     unsigned long simulation_duration_us;       // Total simulation time in microseconds
@@ -37,7 +37,7 @@ typedef struct SimulationStatistics {
     unsigned long total_refill_service_time_us; // Total time spent actively refilling paper
     int papers_refilled;                        // Total number of papers refilled during the simulation
 
-} SimulationStatistics;
+} simulation_statistics_t;
 
 /**
  * @brief Calculates all relevant simulation statistics and formats them as a JSON string to the provided buffer.
@@ -47,20 +47,20 @@ typedef struct SimulationStatistics {
  * @param buf_size The size of the provided buffer.
  * @return The number of bytes written to the buffer, or -1 on error.
  */
-int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_size);
+int write_statistics_to_buffer(simulation_statistics_t* stats, char* buf, int buf_size);
 
 /**
  * @brief Calculates and logs all relevant simulation statistics to stdout.
  *
  * @param stats A simulation statistics struct.
  */
-void log_statistics(SimulationStatistics* stats);
+void log_statistics(simulation_statistics_t* stats);
 
 /**
  * @brief Prints all raw statistics for debugging purposes.
  *
  * @param stats A simulation statistics struct.
  */
-void debug_statistics(const SimulationStatistics* stats);
+void debug_statistics(const simulation_statistics_t* stats);
 
 #endif // SIMULATION_STATS_H

@@ -16,7 +16,7 @@
 extern int g_terminate_now;
 extern int g_debug;
 
-int init_job(Job* job, int job_id, int inter_arrival_time_us, int papers_required) {
+int init_job(job_t* job, int job_id, int inter_arrival_time_us, int papers_required) {
     if (job == NULL) {
         return FALSE;
     }
@@ -37,7 +37,7 @@ int init_job(Job* job, int job_id, int inter_arrival_time_us, int papers_require
     return TRUE;
 }
 
-void drop_job_from_system(Job* job, unsigned long previous_job_arrival_time_us, SimulationStatistics* stats) {
+void drop_job_from_system(job_t* job, unsigned long previous_job_arrival_time_us, simulation_statistics_t* stats) {
     if (job == NULL) return;
     
     // Log the dropped job (this will update statistics internally)
@@ -47,7 +47,7 @@ void drop_job_from_system(Job* job, unsigned long previous_job_arrival_time_us, 
     free(job);
 }
 
-void debug_job(Job* job) {
+void debug_job(job_t* job) {
     if (job == NULL) {
         printf("Job is NULL\n");
         return;
@@ -68,7 +68,7 @@ void debug_job(Job* job) {
 void* job_receiver_thread_func(void* arg) {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
-    JobThreadArgs* args = (JobThreadArgs*)arg;
+    job_thread_args_t* args = (job_thread_args_t*)arg;
     if (args == NULL) {
         fprintf(stderr, "Error: JobThreadArgs is NULL\n");
         return NULL;
@@ -80,9 +80,9 @@ void* job_receiver_thread_func(void* arg) {
     pthread_mutex_t* stats_mutex = args->stats_mutex;
     pthread_mutex_t* simulation_state_mutex = args->simulation_state_mutex;
     pthread_cond_t* job_queue_not_empty_cv = args->job_queue_not_empty_cv;
-    TimedQueue* job_queue = args->job_queue;
-    SimulationParameters* params = args->simulation_params;
-    SimulationStatistics* stats = args->stats;
+    timed_queue_t* job_queue = args->job_queue;
+    simulation_parameters_t* params = args->simulation_params;
+    simulation_statistics_t* stats = args->stats;
     int* all_jobs_arrived = args->all_jobs_arrived;
 
     unsigned long previous_job_arrival_time_us = stats->simulation_start_time_us;
@@ -92,7 +92,7 @@ void* job_receiver_thread_func(void* arg) {
         const int papers_required = random_between(params->papers_required_lower_bound, params->papers_required_upper_bound);
 
         // Allocate and initialize job
-        Job* job = (Job*)malloc(sizeof(Job));
+        job_t* job = (job_t*)malloc(sizeof(job_t));
         if (!init_job(job, job_id + 1, inter_arrival_time_us, papers_required)) {
             fprintf(stderr, "Error: Failed to initialize job %d\n", job_id + 1);
             free(job);

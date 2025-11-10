@@ -36,7 +36,7 @@ static int is_exit_condition_met(int all_jobs_served) {
 void* paper_refill_thread_func(void* arg) {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
     
-    PaperRefillThreadArgs* args = (PaperRefillThreadArgs*)arg;
+    paper_refill_thread_args_t* args = (paper_refill_thread_args_t*)arg;
 
     if (g_debug) printf("Paper refiller thread started\n");
     while (1) {
@@ -69,8 +69,8 @@ void* paper_refill_thread_func(void* arg) {
             pthread_cond_wait(args->refill_supplier_cv, args->paper_refill_queue_mutex);
         }
         unsigned long refill_start_time_us = get_time_in_us();
-        ListNode* elem = list_pop_left(args->paper_refill_queue);
-        Printer* printer = (Printer*)elem->data;
+        list_node_t* elem = list_pop_left(args->paper_refill_queue);
+        printer_t* printer = (printer_t*)elem->data;
         pthread_mutex_unlock(args->paper_refill_queue_mutex); // unlock while refilling
 
         // Refill paper

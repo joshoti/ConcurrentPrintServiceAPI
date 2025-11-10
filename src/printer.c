@@ -21,17 +21,17 @@ extern int g_terminate_now;
  * 
  * @return TRUE if exit condition is met, FALSE otherwise.
  */
-static int is_exit_condition_met(int all_jobs_arrived, TimedQueue* job_queue) {
+static int is_exit_condition_met(int all_jobs_arrived, timed_queue_t* job_queue) {
     return all_jobs_arrived && timed_queue_is_empty(job_queue);
 }
 
-void debug_printer(const Printer* printer) {
+void debug_printer(const printer_t* printer) {
     printf("Debug: Printer %d has printed %d jobs and used %d papers\n",
         printer->id, printer->jobs_printed_count, printer->total_papers_used);
 }
 
 void* printer_thread_func(void* arg) {
-    PrinterThreadArgs* args = (PrinterThreadArgs*)arg;
+    printer_thread_args_t* args = (printer_thread_args_t*)arg;
 
     if (g_debug) printf("Printer %d thread started\n", args->printer->id);
 
@@ -59,8 +59,8 @@ void* printer_thread_func(void* arg) {
         }
 
         // Check if there are enough papers for the job at the front of the queue
-        ListNode* elem = timed_queue_first(args->job_queue);
-        Job* job_to_dequeue = (Job*)elem->data;
+        list_node_t* elem = timed_queue_first(args->job_queue);
+        job_t* job_to_dequeue = (job_t*)elem->data;
         if (job_to_dequeue->papers_required > args->printer->current_paper_count) {
             // Not enough paper for the job at the front of the queue
             pthread_mutex_unlock(args->job_queue_mutex);
@@ -91,7 +91,7 @@ void* printer_thread_func(void* arg) {
         // Get the next job from the queue
         unsigned long queue_last_interaction_time_us = args->job_queue->last_interaction_time_us;
         elem = timed_queue_dequeue_front(args->job_queue);
-        Job* job = (Job*)elem->data;
+        job_t* job = (job_t*)elem->data;
         job->queue_departure_time_us = get_time_in_us();
         emit_queue_departure(job, args->stats, args->job_queue, queue_last_interaction_time_us);
 

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
 #include "common.h"
 #include "linked_list.h"
 #include "test_utils.h"
@@ -19,15 +20,15 @@ static void trim(char *string) {
     }
 }
 
-int test_list_length(LinkedList* list) {
+int test_list_length(linked_list_t* list) {
     return list_length(list);
 }
 
-int test_list_is_empty(LinkedList* list) {
+int test_list_is_empty(linked_list_t* list) {
     return list_is_empty(list);
 }
 
-void test_list_append(LinkedList* list, void* obj1, void* obj2, void* obj3) {
+void test_list_append(linked_list_t* list, void* obj1, void* obj2, void* obj3) {
     int result1 = list_append(list, obj1);
     int result2 = list_append(list, obj2);
     int result3 = list_append(list, obj3);
@@ -38,39 +39,39 @@ void test_list_append(LinkedList* list, void* obj1, void* obj2, void* obj3) {
     }
 }
 
-int test_list_append_left(LinkedList* list, void* obj) {
+int test_list_append_left(linked_list_t* list, void* obj) {
     return list_append_left(list, obj);
 }
 
-ListNode* test_list_pop(LinkedList* list) {
+list_node_t* test_list_pop(linked_list_t* list) {
     return list_pop(list);
 }
 
-ListNode* test_list_pop_left(LinkedList* list) {
+list_node_t* test_list_pop_left(linked_list_t* list) {
     return list_pop_left(list);
 }
 
-void test_list_remove(LinkedList* list, ListNode* node) {
+void test_list_remove(linked_list_t* list, list_node_t* node) {
     list_remove(list, node);
 }
 
-void test_list_clear(LinkedList* list) {
+void test_list_clear(linked_list_t* list) {
     list_clear(list);
 }
 
-ListNode* test_list_first(LinkedList* list) {
+list_node_t* test_list_first(linked_list_t* list) {
     return list_first(list);
 }
 
-ListNode* test_list_last(LinkedList* list) {
+list_node_t* test_list_last(linked_list_t* list) {
     return list_last(list);
 }
 
-ListNode* test_list_find(LinkedList* list, void* data) {
+list_node_t* test_list_find(linked_list_t* list, void* data) {
     return list_find(list, data);
 }
 
-void test_bad_list_init(LinkedList* list) {
+void test_bad_list_init(linked_list_t* list) {
     int result = list_init(list) == FALSE;
     if (result) {
         printf("Passed bad list init test.\n");
@@ -79,7 +80,7 @@ void test_bad_list_init(LinkedList* list) {
     }
 }
 
-void test_list_init(LinkedList* list) {
+void test_list_init(linked_list_t* list) {
     if (list_init(list) == TRUE) {
         printf("Passed list init test.\n");
     } else {
@@ -87,8 +88,8 @@ void test_list_init(LinkedList* list) {
     }
 }
 
-int print_all_elements_and_compare(LinkedList* list, char* expected) {
-    ListNode* curr = list_first(list);
+int print_all_elements_and_compare(linked_list_t* list, char* expected) {
+    list_node_t* curr = list_first(list);
     char actual[256] = "";
     int failed = 0;
     while (curr && curr != &list->tail) {
@@ -117,7 +118,7 @@ int main() {
     int failed_test_count = 0;
     test_bad_list_init(NULL);
     
-    LinkedList list;
+    linked_list_t list;
     test_list_init(&list);
     
     // Test appending elements
@@ -135,8 +136,8 @@ int main() {
     }
     
     // Test first and last elements
-    ListNode* first = test_list_first(&list);
-    ListNode* last = test_list_last(&list);
+    list_node_t* first = test_list_first(&list);
+    list_node_t* last = test_list_last(&list);
     if (first && last && *(int*)first->data == 1 && *(int*)last->data == 3) {
         printf("Passed first and last element test.\n");
     } else {
@@ -148,7 +149,7 @@ int main() {
     printf("List is empty, should be 0: %d\n", test_list_is_empty(&list));
     
     // Test popping elements
-    ListNode* popped = test_list_pop(&list);
+    list_node_t* popped = test_list_pop(&list);
     printf("Popped element, should be 3: %d\n", *(int*)popped->data);
     free(popped);
     

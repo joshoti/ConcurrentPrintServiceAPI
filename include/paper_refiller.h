@@ -3,9 +3,9 @@
 
 #include <pthread.h>
 
-struct LinkedList;
-struct SimulationParameters;
-struct SimulationStatistics;
+struct linked_list;
+struct simulation_parameters;
+struct simulation_statistics;
 
 // --- Utility functions ---
 /**
@@ -19,17 +19,17 @@ void debug_refiller(int papers_supplied);
 /**
  * @brief Arguments for the paper refiller thread.
  */
-typedef struct PaperRefillThreadArgs {
+typedef struct paper_refill_thread_args {
     pthread_mutex_t* paper_refill_queue_mutex;
     pthread_mutex_t* stats_mutex;
     pthread_mutex_t* simulation_state_mutex; // protects g_terminate_now
     pthread_cond_t* refill_needed_cv;
     pthread_cond_t* refill_supplier_cv;
-    struct LinkedList* paper_refill_queue;
-    struct SimulationParameters* params;
-    struct SimulationStatistics* stats;
+    struct linked_list* paper_refill_queue;
+    struct simulation_parameters* params;
+    struct simulation_statistics* stats;
     int* all_jobs_served;
-} PaperRefillThreadArgs;
+} paper_refill_thread_args_t;
 
 // --- Thread function ---
 /**

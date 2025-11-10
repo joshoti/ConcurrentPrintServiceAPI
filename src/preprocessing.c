@@ -43,7 +43,7 @@ int is_positive_integer(const char* str, int value) {
     return TRUE;
 }
 
-int process_args(int argc, char *argv[], SimulationParameters* params) {
+int process_args(int argc, char *argv[], simulation_parameters_t* params) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-help") == 0) {
             usage();

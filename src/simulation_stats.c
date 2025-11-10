@@ -2,15 +2,16 @@
 #include <string.h>
 #include <math.h>
 #include <pthread.h>
+
 #include "simulation_stats.h"
 
 // --- Private Helper Functions ---
 /**
  * @brief Calculates the average inter-arrival time in seconds.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Average inter-arrival time in seconds.
  */
-static double calculate_average_inter_arrival_time(SimulationStatistics* stats) {
+static double calculate_average_inter_arrival_time(simulation_statistics_t* stats) {
     if (stats->total_jobs_arrived <= 1) {
         return 0.0;
     }
@@ -19,10 +20,10 @@ static double calculate_average_inter_arrival_time(SimulationStatistics* stats) 
 
 /**
  * @brief Calculates the average system time in seconds.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Average system time in seconds.
  */
-static double calculate_average_system_time(SimulationStatistics* stats) {
+static double calculate_average_system_time(simulation_statistics_t* stats) {
     if (stats->total_jobs_served == 0) {
         return 0.0;
     }
@@ -31,10 +32,10 @@ static double calculate_average_system_time(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the average queue wait time in seconds.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Average queue wait time in seconds.
  */
-static double calculate_average_queue_wait_time(SimulationStatistics* stats) {
+static double calculate_average_queue_wait_time(simulation_statistics_t* stats) {
     if (stats->total_jobs_served == 0) {
         return 0.0;
     }
@@ -43,10 +44,10 @@ static double calculate_average_queue_wait_time(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the average service time for Printer 1 in seconds.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Average service time for Printer 1 in seconds.
  */
-static double calculate_average_service_time_p1(SimulationStatistics* stats) {
+static double calculate_average_service_time_p1(simulation_statistics_t* stats) {
     if (stats->jobs_served_by_printer1 == 0) {
         return 0.0;
     }
@@ -55,10 +56,10 @@ static double calculate_average_service_time_p1(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the average service time for Printer 2 in seconds.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Average service time for Printer 2 in seconds.
  */
-static double calculate_average_service_time_p2(SimulationStatistics* stats) {
+static double calculate_average_service_time_p2(simulation_statistics_t* stats) {
     if (stats->jobs_served_by_printer2 == 0) {
         return 0.0;
     }
@@ -67,10 +68,10 @@ static double calculate_average_service_time_p2(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the average number of jobs in the queue.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Average number of jobs in the queue.
  */
-static double calculate_average_queue_length(SimulationStatistics* stats) {
+static double calculate_average_queue_length(simulation_statistics_t* stats) {
     if (stats->simulation_duration_us == 0) {
         return 0.0;
     }
@@ -79,10 +80,10 @@ static double calculate_average_queue_length(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the standard deviation of system time in seconds.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Standard deviation of system time in seconds.
  */
-static double calculate_system_time_std_dev(SimulationStatistics* stats) {
+static double calculate_system_time_std_dev(simulation_statistics_t* stats) {
     if (stats->total_jobs_served <= 1) {
         return 0.0;
     }
@@ -97,10 +98,10 @@ static double calculate_system_time_std_dev(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the system utilization for Printer 1.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Utilization of Printer 1 (a value between 0 and 1).
  */
-static double calculate_system_utilization_p1(SimulationStatistics* stats) {
+static double calculate_system_utilization_p1(simulation_statistics_t* stats) {
     if (stats->simulation_duration_us == 0) {
         return 0.0;
     }
@@ -109,10 +110,10 @@ static double calculate_system_utilization_p1(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the system utilization for Printer 2.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Utilization of Printer 2 (a value between 0 and 1).
  */
-static double calculate_system_utilization_p2(SimulationStatistics* stats) {
+static double calculate_system_utilization_p2(simulation_statistics_t* stats) {
     if (stats->simulation_duration_us == 0) {
         return 0.0;
     }
@@ -121,10 +122,10 @@ static double calculate_system_utilization_p2(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the job arrival rate (jobs per second).
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Job arrival rate in jobs per second.
  */
-static double calculate_job_arrival_rate(SimulationStatistics* stats) {
+static double calculate_job_arrival_rate(simulation_statistics_t* stats) {
     if (stats->simulation_duration_us == 0) {
         return 0.0;
     }
@@ -135,10 +136,10 @@ static double calculate_job_arrival_rate(SimulationStatistics* stats) {
 
 /**
  * @brief Calculates the job drop probability.
- * @param stats Pointer to SimulationStatistics struct.
+ * @param stats Pointer to simulation_statistics_t struct.
  * @return Job drop probability (a value between 0 and 1).
  */
-static double calculate_job_drop_probability(SimulationStatistics* stats) {
+static double calculate_job_drop_probability(simulation_statistics_t* stats) {
     if (stats->total_jobs_arrived == 0) {
         return 0.0;
     }
@@ -146,7 +147,7 @@ static double calculate_job_drop_probability(SimulationStatistics* stats) {
 }
 
 // --- Public API Function Implementations ---
-int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_size) {
+int write_statistics_to_buffer(simulation_statistics_t* stats, char* buf, int buf_size) {
     if (stats == NULL || buf == NULL || buf_size <= 0) return -1;
 
     // Calculate derived statistics
@@ -220,7 +221,7 @@ int write_statistics_to_buffer(SimulationStatistics* stats, char* buf, int buf_s
     return len;
 }
 
-void log_statistics(SimulationStatistics* stats) {
+void log_statistics(simulation_statistics_t* stats) {
     if (stats == NULL) return;
     
     // Calculate derived statistics (same calculations as publish_statistics)
@@ -281,7 +282,7 @@ void log_statistics(SimulationStatistics* stats) {
     funlockfile(stdout);
 }
 
-void debug_statistics(const SimulationStatistics* stats) {
+void debug_statistics(const simulation_statistics_t* stats) {
     if (stats == NULL) {
         printf("Statistics struct is NULL\n");
         return;

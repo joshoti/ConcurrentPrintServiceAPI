@@ -7,7 +7,7 @@
  *        and shared variables for command line argument processing and thread management.
  */
 
-typedef struct SimulationParameters {
+typedef struct simulation_parameters {
     double job_arrival_time_us;
     int papers_required_lower_bound;
     int papers_required_upper_bound;
@@ -16,7 +16,7 @@ typedef struct SimulationParameters {
     int printer_paper_capacity;
     double refill_rate;
     int num_jobs;
-} SimulationParameters;
+} simulation_parameters_t;
 
 /**
  * job_arrival_time_us: 600,000 us = 1 job every 0.6 sec
@@ -72,6 +72,6 @@ int is_positive_integer(const char* str, int value);
  * @param params Pointer to SimulationParameters struct to populate
  * @return 0 on failure, 1 on success
  */
-int process_args(int argc, char *argv[], SimulationParameters* params);
+int process_args(int argc, char *argv[], simulation_parameters_t* params);
 
 #endif // PREPROCESSING_H

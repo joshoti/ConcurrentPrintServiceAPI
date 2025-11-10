@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 #include "common.h"
 #include "timed_queue.h"
 #include "linked_list.h"
@@ -12,7 +13,7 @@ void print_timestamp(const char* label, unsigned long timestamp_us) {
     printf("%s: %lu.%03d ms\n", label, ms, us);
 }
 
-int test_timed_queue_init(TimedQueue* tq) {
+int test_timed_queue_init(timed_queue_t* tq) {
     int failed = 0;
     if (timed_queue_init(tq) == TRUE) {
         printf("Passed timed queue init test.\n");
@@ -24,7 +25,7 @@ int test_timed_queue_init(TimedQueue* tq) {
     return failed;
 }
 
-int test_timed_queue_enqueue(TimedQueue* tq, void* obj1, void* obj2, void* obj3, void* obj4) {
+int test_timed_queue_enqueue(timed_queue_t* tq, void* obj1, void* obj2, void* obj3, void* obj4) {
     printf("\n--- Testing Enqueue Operations ---\n");
     int failed = 0;
     
@@ -75,7 +76,7 @@ int test_timed_queue_enqueue(TimedQueue* tq, void* obj1, void* obj2, void* obj3,
     return failed;
 }
 
-int test_timed_queue_dequeue(TimedQueue* tq, int expected_value) {
+int test_timed_queue_dequeue(timed_queue_t* tq, int expected_value) {
     printf("\n--- Testing Dequeue Operation ---\n");
     int failed = 0;
     
@@ -85,7 +86,7 @@ int test_timed_queue_dequeue(TimedQueue* tq, int expected_value) {
     // Small delay to ensure timestamp changes
     usleep(1000); // 1ms delay
     
-    ListNode* node = timed_queue_dequeue_front(tq);
+    list_node_t* node = timed_queue_dequeue_front(tq);
     
     unsigned long time_after = tq->last_interaction_time_us;
     print_timestamp("Timestamp after dequeue", time_after);
@@ -117,7 +118,7 @@ int test_timed_queue_dequeue(TimedQueue* tq, int expected_value) {
     return failed;
 }
 
-int test_read_only_operations(TimedQueue* tq) {
+int test_read_only_operations(timed_queue_t* tq) {
     printf("\n--- Testing Read-Only Operations (Should NOT Update Timestamp) ---\n");
     int failed = 0;
     
@@ -125,13 +126,13 @@ int test_read_only_operations(TimedQueue* tq) {
     print_timestamp("Timestamp before read operations", time_before);
     
     // Test timed_queue_first (read-only)
-    ListNode* first = timed_queue_first(tq);
+    list_node_t* first = timed_queue_first(tq);
     if (first != NULL) {
         printf("First element: %d\n", *(int*)first->data);
     }
     
     // Test timed_queue_last (read-only)
-    ListNode* last = timed_queue_last(tq);
+    list_node_t* last = timed_queue_last(tq);
     if (last != NULL) {
         printf("Last element: %d\n", *(int*)last->data);
     }
@@ -156,9 +157,9 @@ int test_read_only_operations(TimedQueue* tq) {
     return failed;
 }
 
-void print_all_queue_elements(TimedQueue* tq) {
+void print_all_queue_elements(timed_queue_t* tq) {
     printf("\n--- Current Queue Contents ---\n");
-    ListNode* curr = timed_queue_first(tq);
+    list_node_t* curr = timed_queue_first(tq);
     int position = 0;
     
     if (curr == NULL) {
@@ -180,7 +181,7 @@ int main() {
     int failed_test_count = 0;
     
     // Initialize timed queue
-    TimedQueue tq;
+    timed_queue_t tq;
     test_timed_queue_init(&tq);
     
     printf("\n=================================================\n");

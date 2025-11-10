@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <string.h>
+
 #include "test_utils.h"
 #include "job_receiver.h"
 
-int test_job_init(Job* job) {
+int test_job_init(job_t* job) {
     int failed = 0;
     if (!init_job(job, 1, 1000000, 10)) {
         printf("Test failed: init_job returned FALSE\n");
@@ -18,7 +19,7 @@ int test_job_init(Job* job) {
     return failed;
 }
 
-int test_debug_job(Job* job) {
+int test_debug_job(job_t* job) {
     printf("Testing debug_job output:\n");
     debug_job(job);
     // Manual verification needed for debug output
@@ -30,7 +31,7 @@ int main() {
     print_test_start(test_name);
     int failed_tests = 0;
 
-    Job job;
+    job_t job;
     failed_tests += test_job_init(&job);
     failed_tests += test_debug_job(&job);
 

@@ -4,8 +4,8 @@
 #include <pthread.h>
 #include <signal.h>
 
-struct TimedQueue;
-struct SimulationStatistics;
+struct timed_queue;
+struct simulation_statistics;
 
 // --- Utility functions ---
 /**
@@ -14,13 +14,13 @@ struct SimulationStatistics;
  * @param queue Pointer to the TimedQueue representing the job queue to be emptied.
  * @param stats Pointer to the SimulationStatistics struct to update statistics.
  */
-void empty_queue_if_terminating(struct TimedQueue* queue, struct SimulationStatistics* stats);
+void empty_queue_if_terminating(struct timed_queue* queue, struct simulation_statistics* stats);
 
 // --- Signal Catching Thread Arguments ---
 /**
  * @brief Arguments for the signal catching thread.
  */
-typedef struct SignalCatchingThreadArgs {
+typedef struct signal_catching_thread_args {
     sigset_t* signal_set; // Set of signals to wait for
     pthread_mutex_t* job_queue_mutex; // Mutex to protect shared state
     pthread_mutex_t* simulation_state_mutex; // Mutex to protect shared state
@@ -29,12 +29,12 @@ typedef struct SignalCatchingThreadArgs {
     pthread_cond_t* job_queue_not_empty_cv; // Condition variable to signal printer threads
     pthread_cond_t* refill_needed_cv; // Condition variable to signal printers waiting for paper
     pthread_cond_t* refill_supplier_cv; // Condition variable to signal paper refill thread
-    struct TimedQueue* job_queue; // Pointer to the job queue to be emptied
-    struct SimulationStatistics* stats; // Simulation statistics to update
+    struct timed_queue* job_queue; // Pointer to the job queue to be emptied
+    struct simulation_statistics* stats; // Simulation statistics to update
     pthread_t* job_receiver_thread; // Pointer to job receiver thread to cancel
     pthread_t* paper_refill_thread; // Pointer to paper refill thread to cancel
     int* all_jobs_arrived; // Flag indicating if all jobs have arrived
-} SignalCatchingThreadArgs;
+} signal_catching_thread_args_t;
 
 // --- Thread function ---
 /**

@@ -1,32 +1,31 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-struct Job;
-struct Printer;
-struct SimulationParameters;
-struct SimulationStatistics;
-struct TimedQueue;
-
+struct job;
+struct printer;
+struct simulation_parameters;
+struct simulation_statistics;
+struct timed_queue;
 /**
  * @brief Logs the simulation parameters at the start of the simulation.
  * 
  * @param params The simulation parameters to log.
  */
-void log_simulation_parameters(const struct SimulationParameters* params);
+void log_simulation_parameters(const struct simulation_parameters* params);
 
 /**
  * @brief Logs the start of the simulation.
  * 
  * @param stats The simulation statistics to update.
  */
-void log_simulation_start(struct SimulationStatistics* stats);
+void log_simulation_start(struct simulation_statistics* stats);
 
 /**
  * @brief Logs the end of the simulation.
  * 
  * @param stats The simulation statistics to update.
  */
-void log_simulation_end(struct SimulationStatistics* stats);
+void log_simulation_end(struct simulation_statistics* stats);
 
 /**
  * @brief Logs an event when a new job is created in the system.
@@ -35,8 +34,8 @@ void log_simulation_end(struct SimulationStatistics* stats);
  * @param previous_job_arrival_time_us The arrival time of the previous job in microseconds.
  * @param stats The simulation statistics to update.
  */
-void log_system_arrival(struct Job* job, unsigned long previous_job_arrival_time_us,
-    struct SimulationStatistics* stats);
+void log_system_arrival(struct job* job, unsigned long previous_job_arrival_time_us,
+    struct simulation_statistics* stats);
 
 /**
  * @brief Logs an event when a job is dropped from the system.
@@ -45,15 +44,15 @@ void log_system_arrival(struct Job* job, unsigned long previous_job_arrival_time
  * @param previous_job_arrival_time_us The arrival time of the previous job in microseconds.
  * @param stats The simulation statistics to update.
  */
-void log_dropped_job(struct Job* job, unsigned long previous_job_arrival_time_us,
-    struct SimulationStatistics* stats);
+void log_dropped_job(struct job* job, unsigned long previous_job_arrival_time_us,
+    struct simulation_statistics* stats);
 
 /**
  * @brief Logs an event when a job is removed from the system without being processed.
  *
  * @param job The job that has been removed.
  */
-void log_removed_job(struct Job* job);
+void log_removed_job(struct job* job);
 
 /**
  * @brief Logs an event when a job arrives at the queue.
@@ -62,8 +61,8 @@ void log_removed_job(struct Job* job);
  * @param job_queue The job queue to check the length of.
  * @param last_interaction_time_us The last interaction time of the queue in microseconds.
  */
-void log_queue_arrival(const struct Job* job, struct SimulationStatistics* stats,
-    struct TimedQueue* job_queue, unsigned long last_interaction_time_us);
+void log_queue_arrival(const struct job* job, struct simulation_statistics* stats,
+    struct timed_queue* job_queue, unsigned long last_interaction_time_us);
 /**
  * @brief Logs an event when a job departs from the queue.
  *
@@ -72,8 +71,8 @@ void log_queue_arrival(const struct Job* job, struct SimulationStatistics* stats
  * @param job_queue The job queue to check the length of.
  * @param last_interaction_time_us The last interaction time of the queue in microseconds.
  */
-void log_queue_departure(const struct Job* job, struct SimulationStatistics* stats,
-    struct TimedQueue* job_queue, unsigned long last_interaction_time_us);
+void log_queue_departure(const struct job* job, struct simulation_statistics* stats,
+    struct timed_queue* job_queue, unsigned long last_interaction_time_us);
 
 /**
  * @brief Logs an event when a job arrives at a printer for processing.
@@ -81,15 +80,15 @@ void log_queue_departure(const struct Job* job, struct SimulationStatistics* sta
  * @param job The job that has arrived at the printer.
  * @param printer The printer that the job has arrived at.
  */
-void log_printer_arrival(const struct Job* job, const struct Printer* printer);
+void log_printer_arrival(const struct job* job, const struct printer* printer);
 /**
  * @brief Logs an event when a job departs from a printer after processing.
  * @param job The job that has departed from the printer.
  * @param printer The printer that the job has departed from.
  * @param stats The simulation statistics to update.
  */
-void log_system_departure(const struct Job* job, const struct Printer* printer,
-    struct SimulationStatistics* stats);
+void log_system_departure(const struct job* job, const struct printer* printer,
+    struct simulation_statistics* stats);
 
 /**
  * @brief Logs an event when a printer runs out of paper.
@@ -98,7 +97,7 @@ void log_system_departure(const struct Job* job, const struct Printer* printer,
  * @param job_id The id of the job that cannot be processed due to lack of paper.
  * @param current_time_us The current simulation time in microseconds.
  */
-void log_paper_empty(struct Printer* printer, int job_id, unsigned long current_time_us);
+void log_paper_empty(struct printer* printer, int job_id, unsigned long current_time_us);
 /**
  * @brief Logs an event when a printer starts refilling paper.
  *
@@ -107,7 +106,7 @@ void log_paper_empty(struct Printer* printer, int job_id, unsigned long current_
  * @param time_to_refill_us The time it will take to refill the printer in microseconds.
  * @param current_time_us The current simulation time in microseconds.
  */
-void log_paper_refill_start(struct Printer* printer, int papers_needed, int time_to_refill_us, unsigned long current_time_us);
+void log_paper_refill_start(struct printer* printer, int papers_needed, int time_to_refill_us, unsigned long current_time_us);
 /**
  * @brief Logs an event when a printer finishes refilling paper.
  *
@@ -115,12 +114,12 @@ void log_paper_refill_start(struct Printer* printer, int papers_needed, int time
  * @param refill_duration_us The duration of the refill in microseconds.
  * @param current_time_us The current simulation time in microseconds.
  */
-void log_paper_refill_end(struct Printer* printer, int refill_duration_us, unsigned long current_time_us);
+void log_paper_refill_end(struct printer* printer, int refill_duration_us, unsigned long current_time_us);
 
 /**
  * @brief Logs an event when Ctrl+C is pressed to terminate the simulation.
  * @param stats The simulation statistics to update.
  */
-void log_ctrl_c_pressed(struct SimulationStatistics* stats);
+void log_ctrl_c_pressed(struct simulation_statistics* stats);
 
 #endif // LOGGER_H

@@ -1,30 +1,30 @@
 #ifndef EVENT_PUBLISHER_H
 #define EVENT_PUBLISHER_H
 
-struct Job;
-struct Printer;
-struct SimulationParameters;
-struct SimulationStatistics;
-struct TimedQueue;
+struct job;
+struct printer;
+struct simulation_parameters;
+struct simulation_statistics;
+struct timed_queue;
 
 /**
  * @brief Publishes the simulation parameters.
  * 
  * @param params The simulation parameters to publish.
  */
-void publish_simulation_parameters(const struct SimulationParameters* params);
+void publish_simulation_parameters(const struct simulation_parameters* params);
 /**
  * @brief Publishes the start of the simulation.
  * 
  * @param stats The simulation statistics to update.
  */
-void publish_simulation_start(struct SimulationStatistics* stats);
+void publish_simulation_start(struct simulation_statistics* stats);
 /**
  * @brief Publishes the end of the simulation.
  * 
  * @param stats The simulation statistics to update.
  */
-void publish_simulation_end(struct SimulationStatistics* stats);
+void publish_simulation_end(struct simulation_statistics* stats);
 
 /**
  * @brief Publishes an event when a new job is created in the system.
@@ -33,8 +33,8 @@ void publish_simulation_end(struct SimulationStatistics* stats);
  * @param previous_job_arrival_time_us The arrival time of the previous job in microseconds.
  * @param stats The simulation statistics to update.
  */
-void publish_system_arrival(struct Job* job,
-    unsigned long previous_job_arrival_time_us, struct SimulationStatistics* stats);
+void publish_system_arrival(struct job* job,
+    unsigned long previous_job_arrival_time_us, struct simulation_statistics* stats);
 /**
  * @brief Publishes an event when a job is dropped from the system.
  *
@@ -42,14 +42,14 @@ void publish_system_arrival(struct Job* job,
  * @param previous_job_arrival_time_us The arrival time of the previous job in microseconds.
  * @param stats The simulation statistics to update.
  */
-void publish_dropped_job(struct Job* job,
-    unsigned long previous_job_arrival_time_us, struct SimulationStatistics* stats);
+void publish_dropped_job(struct job* job,
+    unsigned long previous_job_arrival_time_us, struct simulation_statistics* stats);
 /**
  * @brief Publishes an event when a job is removed from the system without being processed.
  *
  * @param job The job that has been removed.
  */
-void publish_removed_job(struct Job* job);
+void publish_removed_job(struct job* job);
 
 /**
  * @brief Publishes an event when a job arrives at the queue.
@@ -58,8 +58,8 @@ void publish_removed_job(struct Job* job);
  * @param job_queue The job queue to check the length of.
  * @param last_interaction_time_us The last interaction time of the job queue.
  */
-void publish_queue_arrival(const struct Job* job, struct SimulationStatistics* stats,
-    struct TimedQueue* job_queue, unsigned long last_interaction_time_us);
+void publish_queue_arrival(const struct job* job, struct simulation_statistics* stats,
+    struct timed_queue* job_queue, unsigned long last_interaction_time_us);
 /**
  * @brief Publishes an event when a job departs from the queue.
  *
@@ -68,8 +68,8 @@ void publish_queue_arrival(const struct Job* job, struct SimulationStatistics* s
  * @param job_queue The job queue to check the length of.
  * @param last_interaction_time_us The last interaction time of the job queue.
  */
-void publish_queue_departure(const struct Job* job, struct SimulationStatistics* stats,
-    struct TimedQueue* job_queue, unsigned long last_interaction_time_us);
+void publish_queue_departure(const struct job* job, struct simulation_statistics* stats,
+    struct timed_queue* job_queue, unsigned long last_interaction_time_us);
 
 /**
  * @brief Publishes an event when a job arrives at a printer for processing.
@@ -77,15 +77,15 @@ void publish_queue_departure(const struct Job* job, struct SimulationStatistics*
  * @param job The job that has arrived at the printer.
  * @param printer The printer that the job has arrived at.
  */
-void publish_printer_arrival(const struct Job* job, const struct Printer* printer);
+void publish_printer_arrival(const struct job* job, const struct printer* printer);
 /**
  * @brief Publishes an event when a job departs from a printer after processing.
  * @param job The job that has departed from the printer.
  * @param printer The printer that the job has departed from.
  * @param stats The simulation statistics to update.
  */
-void publish_system_departure(const struct Job* job, const struct Printer* printer,
-    struct SimulationStatistics* stats);
+void publish_system_departure(const struct job* job, const struct printer* printer,
+    struct simulation_statistics* stats);
 
 /**
  * @brief Publishes an event when a printer runs out of paper.
@@ -94,7 +94,7 @@ void publish_system_departure(const struct Job* job, const struct Printer* print
  * @param job_id The id of the job that cannot be processed due to lack of paper.
  * @param current_time_us The current simulation time in microseconds.
  */
-void publish_paper_empty(struct Printer* printer, int job_id, unsigned long current_time_us);
+void publish_paper_empty(struct printer* printer, int job_id, unsigned long current_time_us);
 /**
  * @brief Publishes an event when a printer starts refilling paper.
  *
@@ -103,7 +103,7 @@ void publish_paper_empty(struct Printer* printer, int job_id, unsigned long curr
  * @param time_to_refill_us The time in microseconds it will take to refill the paper
  * @param current_time_us The current simulation time in microseconds.
  */
-void publish_paper_refill_start(struct Printer* printer, int papers_needed,
+void publish_paper_refill_start(struct printer* printer, int papers_needed,
     int time_to_refill_us, unsigned long current_time_us);
 /**
  * @brief Publishes an event when a printer finishes refilling paper.
@@ -112,7 +112,7 @@ void publish_paper_refill_start(struct Printer* printer, int papers_needed,
  * @param refill_duration_us The time in microseconds it took to refill the paper.
  * @param current_time_us The current simulation time in microseconds.
  */
-void publish_paper_refill_end(struct Printer* printer, int refill_duration_us,
+void publish_paper_refill_end(struct printer* printer, int refill_duration_us,
     unsigned long current_time_us);
 
 /**
@@ -120,13 +120,13 @@ void publish_paper_refill_end(struct Printer* printer, int refill_duration_us,
  * 
  * @param stats The simulation statistics to update.
  */
-void publish_simulation_stopped(struct SimulationStatistics* stats);
+void publish_simulation_stopped(struct simulation_statistics* stats);
 
 /**
  * @brief Calculates and publishes all relevant simulation statistics via WebSocket.
  *
  * @param stats A simulation statistics struct.
  */
-void publish_statistics(struct SimulationStatistics* stats);
+void publish_statistics(struct simulation_statistics* stats);
 
 #endif // EVENT_PUBLISHER_H

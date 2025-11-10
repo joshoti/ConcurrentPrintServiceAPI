@@ -4,7 +4,7 @@
 #include "timeutils.h"
 #include "common.h"
 
-int timed_queue_init(TimedQueue* tq) {
+int timed_queue_init(timed_queue_t* tq) {
     if (tq == NULL) {
         return FALSE;
     }
@@ -16,21 +16,21 @@ int timed_queue_init(TimedQueue* tq) {
     return result;
 }
 
-int timed_queue_length(TimedQueue* tq) {
+int timed_queue_length(timed_queue_t* tq) {
     if (tq == NULL) {
         return 0;
     }
     return list_length(&tq->list);
 }
 
-int timed_queue_is_empty(TimedQueue* tq) {
+int timed_queue_is_empty(timed_queue_t* tq) {
     if (tq == NULL) {
         return TRUE;
     }
     return list_is_empty(&tq->list);
 }
 
-int timed_queue_enqueue(TimedQueue* tq, void* data) {
+int timed_queue_enqueue(timed_queue_t* tq, void* data) {
     if (tq == NULL) {
         return FALSE;
     }
@@ -42,7 +42,7 @@ int timed_queue_enqueue(TimedQueue* tq, void* data) {
     return result;
 }
 
-int timed_queue_enqueue_front(TimedQueue* tq, void* data) {
+int timed_queue_enqueue_front(timed_queue_t* tq, void* data) {
     if (tq == NULL) {
         return FALSE;
     }
@@ -54,31 +54,31 @@ int timed_queue_enqueue_front(TimedQueue* tq, void* data) {
     return result;
 }
 
-ListNode* timed_queue_dequeue(TimedQueue* tq) {
+list_node_t* timed_queue_dequeue(timed_queue_t* tq) {
     if (tq == NULL) {
         return NULL;
     }
     
-    ListNode* node = list_pop(&tq->list);
+    list_node_t* node = list_pop(&tq->list);
     if (node != NULL) {
         tq->last_interaction_time_us = get_time_in_us();
     }
     return node;
 }
 
-ListNode* timed_queue_dequeue_front(TimedQueue* tq) {
+list_node_t* timed_queue_dequeue_front(timed_queue_t* tq) {
     if (tq == NULL) {
         return NULL;
     }
     
-    ListNode* node = list_pop_left(&tq->list);
+    list_node_t* node = list_pop_left(&tq->list);
     if (node != NULL) {
         tq->last_interaction_time_us = get_time_in_us();
     }
     return node;
 }
 
-void timed_queue_remove(TimedQueue* tq, ListNode* node) {
+void timed_queue_remove(timed_queue_t* tq, list_node_t* node) {
     if (tq == NULL || node == NULL) {
         return;
     }
@@ -87,7 +87,7 @@ void timed_queue_remove(TimedQueue* tq, ListNode* node) {
     tq->last_interaction_time_us = get_time_in_us();
 }
 
-void timed_queue_clear(TimedQueue* tq) {
+void timed_queue_clear(timed_queue_t* tq) {
     if (tq == NULL) {
         return;
     }
@@ -96,7 +96,7 @@ void timed_queue_clear(TimedQueue* tq) {
     tq->last_interaction_time_us = get_time_in_us();
 }
 
-ListNode* timed_queue_first(TimedQueue* tq) {
+list_node_t* timed_queue_first(timed_queue_t* tq) {
     if (tq == NULL) {
         return NULL;
     }
@@ -104,7 +104,7 @@ ListNode* timed_queue_first(TimedQueue* tq) {
     return list_first(&tq->list);
 }
 
-ListNode* timed_queue_last(TimedQueue* tq) {
+list_node_t* timed_queue_last(timed_queue_t* tq) {
     if (tq == NULL) {
         return NULL;
     }
@@ -112,7 +112,7 @@ ListNode* timed_queue_last(TimedQueue* tq) {
     return list_last(&tq->list);
 }
 
-ListNode* timed_queue_find(TimedQueue* tq, void* data) {
+list_node_t* timed_queue_find(timed_queue_t* tq, void* data) {
     if (tq == NULL) {
         return NULL;
     }

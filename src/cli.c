@@ -43,19 +43,19 @@ int main(int argc, char *argv[]) {
     pthread_cond_t refill_supplier_cv = PTHREAD_COND_INITIALIZER;
 
     // --- Simulation state ---
-    SimulationParameters params = SIMULATION_DEFAULT_PARAMS;
-    SimulationStatistics stats = (SimulationStatistics){0};
+    simulation_parameters_t params = SIMULATION_DEFAULT_PARAMS;
+    simulation_statistics_t stats = (simulation_statistics_t){0};
     int all_jobs_arrived = 0;
     int all_jobs_served = 0;
-    TimedQueue job_queue;
-    LinkedList paper_refill_queue;
+    timed_queue_t job_queue;
+    linked_list_t paper_refill_queue;
     timed_queue_init(&job_queue);
     list_init(&paper_refill_queue);
 
     if (!process_args(argc, argv, &params)) return 1;
 
     // --- Thread argument structs ---
-    JobThreadArgs job_receiver_args = {
+    job_thread_args_t job_receiver_args = {
         .job_queue_mutex = &job_queue_mutex,
         .stats_mutex = &stats_mutex,
         .simulation_state_mutex = &simulation_state_mutex,
@@ -67,10 +67,10 @@ int main(int argc, char *argv[]) {
     };
 
     // Concrete printer instances
-    Printer printer1 = {.id = 1, .current_paper_count = params.printer_paper_capacity, .capacity = params.printer_paper_capacity, .total_papers_used = 0, .jobs_printed_count = 0};
-    Printer printer2 = {.id = 2, .current_paper_count = params.printer_paper_capacity, .capacity = params.printer_paper_capacity, .total_papers_used = 0, .jobs_printed_count = 0};
+    printer_t printer1 = {.id = 1, .current_paper_count = params.printer_paper_capacity, .capacity = params.printer_paper_capacity, .total_papers_used = 0, .jobs_printed_count = 0};
+    printer_t printer2 = {.id = 2, .current_paper_count = params.printer_paper_capacity, .capacity = params.printer_paper_capacity, .total_papers_used = 0, .jobs_printed_count = 0};
 
-    PrinterThreadArgs printer1_args = {
+    printer_thread_args_t printer1_args = {
         .paper_refill_queue_mutex = &paper_refill_queue_mutex,
         .job_queue_mutex = &job_queue_mutex,
         .stats_mutex = &stats_mutex,
@@ -88,10 +88,10 @@ int main(int argc, char *argv[]) {
         .printer = &printer1
     };
 
-    PrinterThreadArgs printer2_args = printer1_args;
+    printer_thread_args_t printer2_args = printer1_args;
 	printer2_args.printer = &printer2;
 
-    PaperRefillThreadArgs paper_refill_args = {
+    paper_refill_thread_args_t paper_refill_args = {
         .paper_refill_queue_mutex = &paper_refill_queue_mutex,
         .stats_mutex = &stats_mutex,
         .simulation_state_mutex = &simulation_state_mutex,
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
         .all_jobs_served = &all_jobs_served
     };
 
-    SignalCatchingThreadArgs signal_catching_args = {
+    signal_catching_thread_args_t signal_catching_args = {
         .signal_set = &set,
         .job_queue_mutex = &job_queue_mutex,
         .simulation_state_mutex = &simulation_state_mutex,

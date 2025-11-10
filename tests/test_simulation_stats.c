@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+
 #include "test_utils.h"
 #include "simulation_stats.h"
 
-int test_create_simulation_stats(SimulationStatistics* stats) {
-    *stats = (SimulationStatistics){0};
+int test_create_simulation_stats(simulation_statistics_t* stats) {
+    *stats = (simulation_statistics_t){0};
 
     // Simulate some statistics
     stats->simulation_start_time_us = 0;
@@ -35,7 +36,7 @@ int test_create_simulation_stats(SimulationStatistics* stats) {
     return 0;
 }
 
-int test_write_statistics_to_buffer(SimulationStatistics* stats) {
+int test_write_statistics_to_buffer(simulation_statistics_t* stats) {
     int failed = 0;
 
     char buffer[1024];
@@ -55,7 +56,7 @@ int test_write_statistics_to_buffer(SimulationStatistics* stats) {
     return failed;
 }
 
-int test_log_statistics(SimulationStatistics* stats) {
+int test_log_statistics(simulation_statistics_t* stats) {
     // Test logging statistics (output to stdout)
     log_statistics(stats);
     return 0;
@@ -66,7 +67,7 @@ int main() {
     print_test_start(test_name);
     int failed_tests = 0;
     
-    SimulationStatistics stats;
+    simulation_statistics_t stats;
     failed_tests += test_create_simulation_stats(&stats);
     failed_tests += test_write_statistics_to_buffer(&stats);
     failed_tests += test_log_statistics(&stats);

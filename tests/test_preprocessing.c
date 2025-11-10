@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+
 #include "common.h"
 #include "preprocessing.h"
 #include "test_utils.h"
@@ -18,7 +19,7 @@ int test_process_args() {
         "-papers_upper", "10"
     };
     int argc = sizeof(argv) / sizeof(argv[0]);
-    SimulationParameters params;
+    simulation_parameters_t params;
 
     if (process_args(argc, argv, &params)) {
         printf("Test passed: num_jobs=%d, queue_capacity=%d,"
@@ -52,7 +53,7 @@ int test_bad_args() {
         "-ref", "0.3"
     };
     int argc = sizeof(argv) / sizeof(argv[0]);
-    SimulationParameters params;
+    simulation_parameters_t params;
 
     if (!process_args(argc, argv, &params)) {
         printf("Test passed: Detected invalid argument\n");

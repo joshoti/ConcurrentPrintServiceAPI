@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+
 #include "common.h"
 #include "event_publisher.h"
 #include "preprocessing.h"
@@ -34,7 +35,7 @@ static void write_time_to_buffer(unsigned long time_us, unsigned long reference_
     sprintf(buf, time_format, milliseconds, microseconds);
 }
 
-void publish_simulation_parameters(const SimulationParameters* params) {
+void publish_simulation_parameters(const simulation_parameters_t* params) {
     char buf[1024];
     sprintf(buf, "{\"type\":\"params\", \"params\": {\"job_arrival_time\":%.6g,\
         \"printing_rate\":%.6g, \"queue_capacity\":%d,\
@@ -47,7 +48,7 @@ void publish_simulation_parameters(const SimulationParameters* params) {
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_simulation_start(SimulationStatistics* stats) {
+void publish_simulation_start(simulation_statistics_t* stats) {
     reference_time_us = get_time_in_us();
     stats->simulation_start_time_us = reference_time_us;
     char time_buf[64];
@@ -58,7 +59,7 @@ void publish_simulation_start(SimulationStatistics* stats) {
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_simulation_end(SimulationStatistics* stats)
+void publish_simulation_end(simulation_statistics_t* stats)
 {
     reference_end_time_us = get_time_in_us();
     char time_buf[64];
@@ -84,7 +85,7 @@ void publish_simulation_end(SimulationStatistics* stats)
  */
 static void job_arrival_helper(int job_id, int papers_required,
     unsigned long previous_job_arrival_time_us, unsigned long current_job_arrival_time_us,
-    int is_dropped, SimulationStatistics* stats)
+    int is_dropped, simulation_statistics_t* stats)
 {
     char time_buf[64];
     char buf[1024];
@@ -103,16 +104,16 @@ static void job_arrival_helper(int job_id, int papers_required,
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_system_arrival(Job* job, unsigned long previous_job_arrival_time_us,
-    SimulationStatistics* stats)
+void publish_system_arrival(job_t* job, unsigned long previous_job_arrival_time_us,
+    simulation_statistics_t* stats)
 {
     job_arrival_helper(job->id, job->papers_required,
         previous_job_arrival_time_us, job->system_arrival_time_us, FALSE,
         stats);
 }
 
-void publish_dropped_job(Job* job, unsigned long previous_job_arrival_time_us,
-    SimulationStatistics* stats)
+void publish_dropped_job(job_t* job, unsigned long previous_job_arrival_time_us,
+    simulation_statistics_t* stats)
 {
     stats->total_jobs_dropped += 1; // stats: total jobs dropped
     job_arrival_helper(job->id, job->papers_required,
@@ -120,7 +121,7 @@ void publish_dropped_job(Job* job, unsigned long previous_job_arrival_time_us,
         stats);
 }
 
-void publish_removed_job(Job* job) {
+void publish_removed_job(job_t* job) {
     unsigned long current_time_us = get_time_in_us();
     char time_buf[64];
     char buf[1024];
@@ -131,8 +132,8 @@ void publish_removed_job(Job* job) {
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_queue_arrival(const Job* job, SimulationStatistics* stats,
-    TimedQueue* job_queue, unsigned long last_interaction_time_us)
+void publish_queue_arrival(const job_t* job, simulation_statistics_t* stats,
+    timed_queue_t* job_queue, unsigned long last_interaction_time_us)
 {
     stats->area_num_in_job_queue_us +=
         (job->queue_arrival_time_us - last_interaction_time_us) * // duration of previous state
@@ -149,8 +150,8 @@ void publish_queue_arrival(const Job* job, SimulationStatistics* stats,
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_queue_departure(const Job* job, SimulationStatistics* stats,
-    TimedQueue* job_queue, unsigned long last_interaction_time_us)
+void publish_queue_departure(const job_t* job, simulation_statistics_t* stats,
+    timed_queue_t* job_queue, unsigned long last_interaction_time_us)
 {
     stats->area_num_in_job_queue_us +=
         (job->queue_departure_time_us - last_interaction_time_us) * // duration of previous state
@@ -170,7 +171,7 @@ void publish_queue_departure(const Job* job, SimulationStatistics* stats,
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_printer_arrival(const Job* job, const Printer* printer)
+void publish_printer_arrival(const job_t* job, const printer_t* printer)
 {
     char time_buf[64];
     char buf[1024];
@@ -180,8 +181,8 @@ void publish_printer_arrival(const Job* job, const Printer* printer)
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_system_departure(const Job* job, const Printer* printer,
-    SimulationStatistics* stats)
+void publish_system_departure(const job_t* job, const printer_t* printer,
+    simulation_statistics_t* stats)
 {
     char time_buf[64];
     char buf[1024];
@@ -210,7 +211,7 @@ void publish_system_departure(const Job* job, const Printer* printer,
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_paper_empty(Printer* printer, int job_id, unsigned long current_time_us)
+void publish_paper_empty(printer_t* printer, int job_id, unsigned long current_time_us)
 {
     char time_buf[64];
     char buf[1024];
@@ -220,7 +221,7 @@ void publish_paper_empty(Printer* printer, int job_id, unsigned long current_tim
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_paper_refill_start(Printer* printer, int papers_needed,
+void publish_paper_refill_start(printer_t* printer, int papers_needed,
     int time_to_refill_us, unsigned long current_time_us)
 {
     char time_buf[64];
@@ -233,7 +234,7 @@ void publish_paper_refill_start(Printer* printer, int papers_needed,
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_paper_refill_end(Printer* printer, int refill_duration_us,
+void publish_paper_refill_end(printer_t* printer, int refill_duration_us,
     unsigned long current_time_us)
 {
     char time_buf[64];
@@ -246,7 +247,7 @@ void publish_paper_refill_end(Printer* printer, int refill_duration_us,
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_simulation_stopped(SimulationStatistics* stats) {
+void publish_simulation_stopped(simulation_statistics_t* stats) {
     char time_buf[64];
     char buf[1024];
     reference_end_time_us = get_time_in_us();
@@ -258,7 +259,7 @@ void publish_simulation_stopped(SimulationStatistics* stats) {
     ws_bridge_send_json_from_any_thread(buf, strlen(buf));
 }
 
-void publish_statistics(SimulationStatistics* stats) {
+void publish_statistics(simulation_statistics_t* stats) {
     if (stats == NULL) return;
 
     char buf[4096];

@@ -3,32 +3,32 @@
 
 #include <pthread.h>
 
-struct LinkedList;
-struct TimedQueue;
-struct SimulationParameters;
-struct SimulationStatistics;
+struct linked_list;
+struct timed_queue;
+struct simulation_parameters;
+struct simulation_statistics;
 
 // --- Printer structure ---
-typedef struct Printer {
+typedef struct printer {
     int id; // Unique identifier for the printer
     int current_paper_count; // Current number of papers in the printer
     int total_papers_used; // Total number of papers used by this printer
     int capacity; // Maximum paper capacity of the printer
     int jobs_printed_count; // Total number of jobs printed by this printer
-} Printer;
+} printer_t;
 
 // --- Utility functions ---
 /**
  * @brief Prints printer details for debugging purposes.
  * @param printer Pointer to the Printer struct.
  */
-void debug_printer(const Printer* printer);
+void debug_printer(const printer_t* printer);
 
 // --- Printer Thread Arguments ---
 /**
  * @brief Arguments for the printer thread.
  */
-typedef struct PrinterThreadArgs {
+typedef struct printer_thread_args {
     pthread_mutex_t* paper_refill_queue_mutex;
     pthread_mutex_t* job_queue_mutex;
     pthread_mutex_t* stats_mutex;
@@ -37,14 +37,14 @@ typedef struct PrinterThreadArgs {
     pthread_cond_t* refill_needed_cv;
     pthread_cond_t* refill_supplier_cv;
     pthread_t* paper_refill_thread;
-    struct TimedQueue* job_queue;
-    struct LinkedList* paper_refill_queue;
-    struct SimulationParameters* params;
-    struct SimulationStatistics* stats;
+    struct timed_queue* job_queue;
+    struct linked_list* paper_refill_queue;
+    struct simulation_parameters* params;
+    struct simulation_statistics* stats;
     int* all_jobs_served;
     int* all_jobs_arrived;
-    Printer* printer;
-} PrinterThreadArgs;
+    printer_t* printer;
+} printer_thread_args_t;
 
 // --- Thread function ---
 /**

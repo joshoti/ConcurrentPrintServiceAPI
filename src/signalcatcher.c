@@ -15,10 +15,10 @@
 extern int g_debug;
 extern int g_terminate_now;
 
-void empty_queue_if_terminating(TimedQueue* queue, SimulationStatistics* stats) {
+void empty_queue_if_terminating(timed_queue_t* queue, simulation_statistics_t* stats) {
     while (!timed_queue_is_empty(queue)) {
-        ListNode* curr = timed_queue_dequeue_front(queue);
-        Job* job = (Job*)curr->data;
+    list_node_t* curr = timed_queue_dequeue_front(queue);
+    job_t* job = (job_t*)curr->data;
         job->queue_departure_time_us = get_time_in_us();
         emit_removed_job(job);
         free(curr);
@@ -29,7 +29,7 @@ void empty_queue_if_terminating(TimedQueue* queue, SimulationStatistics* stats) 
 
 void* sig_int_catching_thread_func(void* arg) {
     int sig;
-    SignalCatchingThreadArgs* args = (SignalCatchingThreadArgs*)arg;
+    signal_catching_thread_args_t* args = (signal_catching_thread_args_t*)arg;
     sigwait(args->signal_set, &sig);
 
     pthread_mutex_lock(args->simulation_state_mutex);

@@ -35,7 +35,7 @@ static unsigned long g_ws_conn_id = 0; // 0 means none
 extern int g_debug;
 extern int g_terminate_now;
 
-typedef struct SimulationContext {
+typedef struct simulation_context {
 	// Threads
 	pthread_t printer1_thread;
 	pthread_t printer2_thread;
@@ -53,30 +53,30 @@ typedef struct SimulationContext {
 	pthread_cond_t refill_supplier_cv;
 
 	// State
-	SimulationParameters params;
-	SimulationStatistics stats;
+	simulation_parameters_t params;
+	simulation_statistics_t stats;
 	int all_jobs_arrived;
 	int all_jobs_served;
-	TimedQueue job_queue;
-	LinkedList paper_refill_queue;
+	timed_queue_t job_queue;
+	linked_list_t paper_refill_queue;
 
 	// Args
-	JobThreadArgs job_receiver_args;
-	PrinterThreadArgs printer1_args;
-	PrinterThreadArgs printer2_args;
-	PaperRefillThreadArgs paper_refill_args;
+	job_thread_args_t job_receiver_args;
+	printer_thread_args_t printer1_args;
+	printer_thread_args_t printer2_args;
+	paper_refill_thread_args_t paper_refill_args;
 
 	// Control
 	int is_running;
-} SimulationContext;
+} simulation_context_t;
 
-static SimulationContext g_ctx; // single simulation instance
+static simulation_context_t g_ctx; // single simulation instance
 static pthread_mutex_t g_server_state_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void init_context(SimulationContext* ctx) {
+static void init_context(simulation_context_t* ctx) {
 	memset(ctx, 0, sizeof(*ctx));
-	ctx->params = (SimulationParameters)SIMULATION_DEFAULT_PARAMS;
-	ctx->stats = (SimulationStatistics){0};
+	ctx->params = (simulation_parameters_t)SIMULATION_DEFAULT_PARAMS;
+	ctx->stats = (simulation_statistics_t){0};
 	ctx->all_jobs_arrived = 0;
 	ctx->all_jobs_served = 0;
 	ctx->is_running = 0;
@@ -93,7 +93,7 @@ static void init_context(SimulationContext* ctx) {
 	list_init(&ctx->paper_refill_queue);
 }
 
-static void destroy_context(SimulationContext* ctx) {
+static void destroy_context(simulation_context_t* ctx) {
 	pthread_mutex_destroy(&ctx->job_queue_mutex);
 	pthread_mutex_destroy(&ctx->paper_refill_queue_mutex);
 	pthread_mutex_destroy(&ctx->stats_mutex);
@@ -105,10 +105,10 @@ static void destroy_context(SimulationContext* ctx) {
 
 static void* simulation_runner(void* arg) {
     if (g_debug) printf("Simulation runner thread started\n");
-	SimulationContext* ctx = (SimulationContext*)arg;
+	simulation_context_t* ctx = (simulation_context_t*)arg;
 
 	// Prepare thread args
-	JobThreadArgs job_receiver_args = {
+	job_thread_args_t job_receiver_args = {
 		.job_queue_mutex = &ctx->job_queue_mutex,
 		.stats_mutex = &ctx->stats_mutex,
 		.simulation_state_mutex = &ctx->simulation_state_mutex,
@@ -121,10 +121,10 @@ static void* simulation_runner(void* arg) {
 	ctx->job_receiver_args = job_receiver_args;
 
 	// Concrete printers
-	Printer printer1 = {.id = 1, .current_paper_count = ctx->params.printer_paper_capacity, .capacity = ctx->params.printer_paper_capacity, .total_papers_used = 0, .jobs_printed_count = 0};
-	Printer printer2 = {.id = 2, .current_paper_count = ctx->params.printer_paper_capacity, .capacity = ctx->params.printer_paper_capacity, .total_papers_used = 0, .jobs_printed_count = 0};
+	printer_t printer1 = {.id = 1, .current_paper_count = ctx->params.printer_paper_capacity, .capacity = ctx->params.printer_paper_capacity, .total_papers_used = 0, .jobs_printed_count = 0};
+	printer_t printer2 = {.id = 2, .current_paper_count = ctx->params.printer_paper_capacity, .capacity = ctx->params.printer_paper_capacity, .total_papers_used = 0, .jobs_printed_count = 0};
 
-	PrinterThreadArgs printer1_args = {
+	printer_thread_args_t printer1_args = {
 		.paper_refill_queue_mutex = &ctx->paper_refill_queue_mutex,
 		.job_queue_mutex = &ctx->job_queue_mutex,
 		.stats_mutex = &ctx->stats_mutex,
@@ -143,11 +143,11 @@ static void* simulation_runner(void* arg) {
 	};
 	ctx->printer1_args = printer1_args;
 
-	PrinterThreadArgs printer2_args = printer1_args;
+	printer_thread_args_t printer2_args = printer1_args;
 	printer2_args.printer = &printer2;
 	ctx->printer2_args = printer2_args;
 
-	PaperRefillThreadArgs paper_refill_args = {
+	paper_refill_thread_args_t paper_refill_args = {
 		.paper_refill_queue_mutex = &ctx->paper_refill_queue_mutex,
 		.stats_mutex = &ctx->stats_mutex,
 		.simulation_state_mutex = &ctx->simulation_state_mutex,
@@ -187,7 +187,7 @@ static void* simulation_runner(void* arg) {
 	return NULL;
 }
 
-static void start_simulation_async(SimulationContext* ctx) {
+static void start_simulation_async(simulation_context_t* ctx) {
 	pthread_mutex_lock(&g_server_state_mutex);
 	if (ctx->is_running) {
 		pthread_mutex_unlock(&g_server_state_mutex);
@@ -198,7 +198,7 @@ static void start_simulation_async(SimulationContext* ctx) {
 	pthread_create(&ctx->simulation_runner_thread, NULL, simulation_runner, ctx);
 }
 
-static void request_stop_simulation(SimulationContext* ctx) {
+static void request_stop_simulation(simulation_context_t* ctx) {
 	// Emulate signal catcher logic to stop simulation gracefully
 	pthread_mutex_lock(&ctx->simulation_state_mutex);
 	g_terminate_now = 1;
