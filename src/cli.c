@@ -88,23 +88,8 @@ int main(int argc, char *argv[]) {
         .printer = &printer1
     };
 
-    PrinterThreadArgs printer2_args = {
-        .paper_refill_queue_mutex = &paper_refill_queue_mutex,
-        .job_queue_mutex = &job_queue_mutex,
-        .stats_mutex = &stats_mutex,
-        .simulation_state_mutex = &simulation_state_mutex,
-        .job_queue_not_empty_cv = &job_queue_not_empty_cv,
-        .refill_needed_cv = &refill_needed_cv,
-        .refill_supplier_cv = &refill_supplier_cv,
-        .paper_refill_thread = &paper_refill_thread,
-        .job_queue = &job_queue,
-        .paper_refill_queue = &paper_refill_queue,
-        .params = &params,
-        .stats = &stats,
-        .all_jobs_served = &all_jobs_served,
-        .all_jobs_arrived = &all_jobs_arrived,
-        .printer = &printer2
-    };
+    PrinterThreadArgs printer2_args = printer1_args;
+	printer2_args.printer = &printer2;
 
     PaperRefillThreadArgs paper_refill_args = {
         .paper_refill_queue_mutex = &paper_refill_queue_mutex,

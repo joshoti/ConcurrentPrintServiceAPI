@@ -199,7 +199,7 @@ static void start_simulation_async(SimulationContext* ctx) {
 }
 
 static void request_stop_simulation(SimulationContext* ctx) {
-	// Emulate signal catcher logic to stop gracefully
+	// Emulate signal catcher logic to stop simulation gracefully
 	pthread_mutex_lock(&ctx->simulation_state_mutex);
 	g_terminate_now = 1;
 	ctx->all_jobs_arrived = 1;
