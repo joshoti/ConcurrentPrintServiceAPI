@@ -8,6 +8,7 @@
 #include "printer.h"
 #include "simulation_stats.h"
 #include "console_handler.h"
+#include "log_router.h"
 #include "timed_queue.h"
 #include "timeutils.h"
 
@@ -229,4 +230,25 @@ void log_ctrl_c_pressed(simulation_statistics_t* stats) {
     printf("simulation stopped, duration = %d.%03dms\n",
         (int)(stats->simulation_duration_us / 1000), (int)(stats->simulation_duration_us % 1000));
     funlockfile(stdout);
+}
+
+void console_handler_register(void) {
+    static const log_ops_t ops = {
+        .simulation_parameters = log_simulation_parameters,
+        .simulation_start = log_simulation_start,
+        .simulation_end = log_simulation_end,
+        .system_arrival = log_system_arrival,
+        .dropped_job = log_dropped_job,
+        .removed_job = log_removed_job,
+        .queue_arrival = log_queue_arrival,
+        .queue_departure = log_queue_departure,
+        .printer_arrival = log_printer_arrival,
+        .system_departure = log_system_departure,
+        .paper_empty = log_paper_empty,
+        .paper_refill_start = log_paper_refill_start,
+        .paper_refill_end = log_paper_refill_end,
+        .simulation_stopped = log_ctrl_c_pressed,
+        .statistics = log_statistics,
+    };
+    log_router_register_console_handler(&ops);
 }

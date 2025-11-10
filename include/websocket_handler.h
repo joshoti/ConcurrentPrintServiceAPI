@@ -129,4 +129,9 @@ void publish_simulation_stopped(struct simulation_statistics* stats);
  */
 void publish_statistics(struct simulation_statistics* stats);
 
+/**
+ * @brief Registers the websocket handler with the log router
+ */
+void websocket_handler_register(void);
+
 #endif // WEBSOCKET_HANDLER_H

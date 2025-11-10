@@ -14,8 +14,6 @@ struct timed_queue;
 #define LOG_MODE_TERMINAL 0
 #define LOG_MODE_SERVER   1
 
-extern int g_log_mode;
-
 // Unified logging operations vtable
 typedef struct log_ops {
     void (*simulation_parameters)(const struct simulation_parameters* params);
@@ -53,12 +51,14 @@ extern const log_ops_t* logger;
 // Bind mode and select an already-registered handler (console/websocket)
 void set_log_mode(int mode);
 
-// Allow CLI/server to register their respective handlers without creating
-// link-time dependencies in the router.
+/*
+ * Allow CLI/server to register their respective handlers without creating
+ * link-time dependencies in the router.
+ */
 void log_router_register_console_handler(const log_ops_t* ops);
 void log_router_register_websocket_handler(const log_ops_t* ops);
 
-// Wrapper API that routes to stdout logger or websocket publisher
+// --- Wrapper API that routes to stdout or websocket ---
 void emit_simulation_parameters(const struct simulation_parameters* params);
 void emit_simulation_start(struct simulation_statistics* stats);
 void emit_simulation_end(struct simulation_statistics* stats);

@@ -6,6 +6,7 @@
 #include "preprocessing.h"
 #include "timeutils.h"
 #include "mongoose.h"
+#include "log_router.h"
 #include "simulation_stats.h"
 #include "ws_bridge.h"
 #include "job_receiver.h"
@@ -266,4 +267,25 @@ void publish_statistics(simulation_statistics_t* stats) {
     if (write_statistics_to_buffer(stats, buf, sizeof(buf)) > 0) {
         ws_bridge_send_json_from_any_thread(buf, strlen(buf));
     }
+}
+
+void websocket_handler_register(void) {
+    static const log_ops_t ops = {
+        .simulation_parameters = publish_simulation_parameters,
+        .simulation_start = publish_simulation_start,
+        .simulation_end = publish_simulation_end,
+        .system_arrival = publish_system_arrival,
+        .dropped_job = publish_dropped_job,
+        .removed_job = publish_removed_job,
+        .queue_arrival = publish_queue_arrival,
+        .queue_departure = publish_queue_departure,
+        .printer_arrival = publish_printer_arrival,
+        .system_departure = publish_system_departure,
+        .paper_empty = publish_paper_empty,
+        .paper_refill_start = publish_paper_refill_start,
+        .paper_refill_end = publish_paper_refill_end,
+        .simulation_stopped = publish_simulation_stopped,
+        .statistics = publish_statistics,
+    };
+    log_router_register_websocket_handler(&ops);
 }

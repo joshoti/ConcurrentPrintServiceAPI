@@ -234,6 +234,13 @@ static int ws_msg_equals(struct mg_str s, const char *lit) {
 }
 
 // Mongoose event handler
+/**
+ * @brief Mongoose event handler for HTTP and WebSocket events
+ * 
+ * @param c The Mongoose connection
+ * @param ev The event type
+ * @param ev_data Event-specific data
+ */
 static void fn(struct mg_connection *c, int ev, void *ev_data) {
 	if (ev == MG_EV_HTTP_MSG) {
 		struct mg_http_message *hm = (struct mg_http_message *) ev_data;
@@ -283,7 +290,12 @@ static void fn(struct mg_connection *c, int ev, void *ev_data) {
 	}
 }
 
-// Thread-safe enqueue of a JSON frame for websocket client
+/**
+ * @brief Thread-safe enqueue of a JSON frame for websocket client
+ * 
+ * @param json The JSON data to send
+ * @param len The length of the JSON data
+ */
 void ws_bridge_send_json_from_any_thread(const char *json, size_t len) {
 	if (json == NULL || len == 0) return;
 	pthread_mutex_lock(&g_ws_mutex);
@@ -299,25 +311,8 @@ int main(int argc, char *argv[]) {
 	init_context(&g_ctx);
 	if (!process_args(argc, argv, &g_ctx.params)) return 1;
 
-	// Register websocket handler (publisher)
-	static const log_ops_t websocket_handler = {
-		.simulation_parameters = publish_simulation_parameters,
-		.simulation_start = publish_simulation_start,
-		.simulation_end = publish_simulation_end,
-		.system_arrival = publish_system_arrival,
-		.dropped_job = publish_dropped_job,
-		.removed_job = publish_removed_job,
-		.queue_arrival = publish_queue_arrival,
-		.queue_departure = publish_queue_departure,
-		.printer_arrival = publish_printer_arrival,
-		.system_departure = publish_system_departure,
-		.paper_empty = publish_paper_empty,
-		.paper_refill_start = publish_paper_refill_start,
-		.paper_refill_end = publish_paper_refill_end,
-		.simulation_stopped = publish_simulation_stopped,
-		.statistics = publish_statistics,
-	};
-	log_router_register_websocket_handler(&websocket_handler);
+	// Register websocket handler
+	websocket_handler_register();
 
 	// Server mode: send over websocket
 	set_log_mode(LOG_MODE_SERVER);

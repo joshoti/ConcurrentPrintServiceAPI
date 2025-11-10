@@ -1,6 +1,6 @@
 #include "log_router.h"
 
-int g_log_mode = LOG_MODE_TERMINAL;
+static int log_mode = LOG_MODE_TERMINAL;
 
 // Registered handlers provided by CLI/server at startup
 static const log_ops_t* s_console_handler = NULL;
@@ -18,8 +18,8 @@ void log_router_register_websocket_handler(const log_ops_t* ops) {
 }
 
 void set_log_mode(int mode) {
-    g_log_mode = mode;
-    if (g_log_mode == LOG_MODE_SERVER) {
+    log_mode = mode;
+    if (log_mode == LOG_MODE_SERVER) {
         logger = s_websocket_handler;
     } else {
         logger = s_console_handler;

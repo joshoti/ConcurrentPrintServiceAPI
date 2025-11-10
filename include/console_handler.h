@@ -122,4 +122,9 @@ void log_paper_refill_end(struct printer* printer, int refill_duration_us, unsig
  */
 void log_ctrl_c_pressed(struct simulation_statistics* stats);
 
+/**
+ * @brief Registers the console handler with the log router
+ */
+void console_handler_register(void);
+
 #endif // CONSOLE_HANDLER_H
