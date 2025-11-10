@@ -13,8 +13,8 @@ ODIR = build
 
 # --- Source File Organization ---
 SHARED_SRCS = src/linked_list.c src/timed_queue.c src/job_receiver.c src/common/timeutils.c src/paper_refiller.c src/printer.c src/simulation_stats.c src/preprocessing.c src/log_router.c src/signalcatcher.c
-SERVER_SRCS = src/server.c src/event_publisher.c
-CLI_SRCS = src/cli.c src/logger.c
+SERVER_SRCS = src/server.c src/websocket_handler.c
+CLI_SRCS = src/cli.c src/console_handler.c
 EXTERNAL_SRCS = external/mongoose.c
 
 # --- Automatic Object File Generation ---

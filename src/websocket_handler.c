@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "event_publisher.h"
+#include "websocket_handler.h"
 #include "preprocessing.h"
 #include "timeutils.h"
 #include "mongoose.h"

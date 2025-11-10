@@ -16,7 +16,7 @@
 #include "job_receiver.h"
 #include "paper_refiller.h"
 #include "printer.h"
-#include "event_publisher.h"
+#include "websocket_handler.h"
 #include "ws_bridge.h"
 #include "log_router.h"
 #include "simulation_stats.h"
@@ -299,28 +299,28 @@ int main(int argc, char *argv[]) {
 	init_context(&g_ctx);
 	if (!process_args(argc, argv, &g_ctx.params)) return 1;
 
+	// Register websocket handler (publisher)
+	static const log_ops_t websocket_handler = {
+		.simulation_parameters = publish_simulation_parameters,
+		.simulation_start = publish_simulation_start,
+		.simulation_end = publish_simulation_end,
+		.system_arrival = publish_system_arrival,
+		.dropped_job = publish_dropped_job,
+		.removed_job = publish_removed_job,
+		.queue_arrival = publish_queue_arrival,
+		.queue_departure = publish_queue_departure,
+		.printer_arrival = publish_printer_arrival,
+		.system_departure = publish_system_departure,
+		.paper_empty = publish_paper_empty,
+		.paper_refill_start = publish_paper_refill_start,
+		.paper_refill_end = publish_paper_refill_end,
+		.simulation_stopped = publish_simulation_stopped,
+		.statistics = publish_statistics,
+	};
+	log_router_register_websocket_handler(&websocket_handler);
+
 	// Server mode: send over websocket
 	set_log_mode(LOG_MODE_SERVER);
-
-    // Bind publisher backend so the router can call them without a hard dependency in CLI
-    struct PublisherBackend pubs = {
-		.publish_simulation_parameters = publish_simulation_parameters,
-		.publish_simulation_start = publish_simulation_start,
-		.publish_simulation_end = publish_simulation_end,
-		.publish_system_arrival = publish_system_arrival,
-		.publish_dropped_job = publish_dropped_job,
-		.publish_removed_job = publish_removed_job,
-		.publish_queue_arrival = publish_queue_arrival,
-		.publish_queue_departure = publish_queue_departure,
-		.publish_printer_arrival = publish_printer_arrival,
-		.publish_system_departure = publish_system_departure,
-		.publish_paper_empty = publish_paper_empty,
-		.publish_paper_refill_start = publish_paper_refill_start,
-		.publish_paper_refill_end = publish_paper_refill_end,
-		.publish_simulation_stopped = publish_simulation_stopped,
-		.publish_statistics = publish_statistics,
-	};
-	log_router_set_publisher_backend(&pubs);
 
 	mg_mgr_init(&g_mgr); // Initialise event manager
 

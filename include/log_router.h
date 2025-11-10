@@ -16,75 +16,47 @@ struct timed_queue;
 
 extern int g_log_mode;
 
+// Unified logging operations vtable
+typedef struct log_ops {
+    void (*simulation_parameters)(const struct simulation_parameters* params);
+    void (*simulation_start)(struct simulation_statistics* stats);
+    void (*simulation_end)(struct simulation_statistics* stats);
+
+    void (*system_arrival)(struct job* job, unsigned long previous_job_arrival_time_us,
+                           struct simulation_statistics* stats);
+    void (*dropped_job)(struct job* job, unsigned long previous_job_arrival_time_us,
+                        struct simulation_statistics* stats);
+    void (*removed_job)(struct job* job);
+
+    void (*queue_arrival)(const struct job* job, struct simulation_statistics* stats,
+                          struct timed_queue* job_queue, unsigned long last_interaction_time_us);
+    void (*queue_departure)(const struct job* job, struct simulation_statistics* stats,
+                            struct timed_queue* job_queue, unsigned long last_interaction_time_us);
+
+    void (*printer_arrival)(const struct job* job, const struct printer* printer);
+    void (*system_departure)(const struct job* job, const struct printer* printer,
+                             struct simulation_statistics* stats);
+
+    void (*paper_empty)(struct printer* printer, int job_id, unsigned long current_time_us);
+    void (*paper_refill_start)(struct printer* printer, int papers_needed,
+                               int time_to_refill_us, unsigned long current_time_us);
+    void (*paper_refill_end)(struct printer* printer, int refill_duration_us,
+                             unsigned long current_time_us);
+
+    void (*simulation_stopped)(struct simulation_statistics* stats);
+    void (*statistics)(struct simulation_statistics* stats);
+} log_ops_t;
+
+// Global active logger backend pointer bound via set_log_mode
+extern const log_ops_t* logger;
+
+// Bind mode and select an already-registered handler (console/websocket)
 void set_log_mode(int mode);
 
-// Publisher backend (set by server at startup). Keeping this in the router header
-// avoids a hard link-time dependency on the publisher in CLI mode.
-struct PublisherBackend {
-    void (*publish_simulation_parameters)(const struct simulation_parameters* params);
-    void (*publish_simulation_start)(struct simulation_statistics* stats);
-    void (*publish_simulation_end)(struct simulation_statistics* stats);
-
-    void (*publish_system_arrival)(struct job* job, unsigned long previous_job_arrival_time_us,
-                                   struct simulation_statistics* stats);
-    void (*publish_dropped_job)(struct job* job, unsigned long previous_job_arrival_time_us,
-                                struct simulation_statistics* stats);
-    void (*publish_removed_job)(struct job* job);
-
-    void (*publish_queue_arrival)(const struct job* job, struct simulation_statistics* stats,
-                                  struct timed_queue* job_queue, unsigned long last_interaction_time_us);
-    void (*publish_queue_departure)(const struct job* job, struct simulation_statistics* stats,
-                                    struct timed_queue* job_queue, unsigned long last_interaction_time_us);
-
-    void (*publish_printer_arrival)(const struct job* job, const struct printer* printer);
-    void (*publish_system_departure)(const struct job* job, const struct printer* printer,
-                                     struct simulation_statistics* stats);
-
-    void (*publish_paper_empty)(struct printer* printer, int job_id, unsigned long current_time_us);
-    void (*publish_paper_refill_start)(struct printer* printer, int papers_needed,
-                                       int time_to_refill_us, unsigned long current_time_us);
-    void (*publish_paper_refill_end)(struct printer* printer, int refill_duration_us,
-                                     unsigned long current_time_us);
-
-    void (*publish_simulation_stopped)(struct simulation_statistics* stats);
-    void (*publish_statistics)(struct simulation_statistics* stats);
-};
-
-void log_router_set_publisher_backend(const struct PublisherBackend* pubs);
-
-// Logger backend (set by CLI at startup). This removes a hard dependency
-// on logger.c from the server build.
-struct LoggerBackend {
-    void (*log_simulation_parameters)(const struct simulation_parameters* params);
-    void (*log_simulation_start)(struct simulation_statistics* stats);
-    void (*log_simulation_end)(struct simulation_statistics* stats);
-
-    void (*log_system_arrival)(struct job* job, unsigned long previous_job_arrival_time_us,
-                               struct simulation_statistics* stats);
-    void (*log_dropped_job)(struct job* job, unsigned long previous_job_arrival_time_us,
-                            struct simulation_statistics* stats);
-    void (*log_removed_job)(struct job* job);
-
-    void (*log_queue_arrival)(const struct job* job, struct simulation_statistics* stats,
-                              struct timed_queue* job_queue, unsigned long last_interaction_time_us);
-    void (*log_queue_departure)(const struct job* job, struct simulation_statistics* stats,
-                                struct timed_queue* job_queue, unsigned long last_interaction_time_us);
-
-    void (*log_printer_arrival)(const struct job* job, const struct printer* printer);
-    void (*log_system_departure)(const struct job* job, const struct printer* printer,
-                                 struct simulation_statistics* stats);
-
-    void (*log_paper_empty)(struct printer* printer, int job_id, unsigned long current_time_us);
-    void (*log_paper_refill_start)(struct printer* printer, int papers_needed,
-                                   int time_to_refill_us, unsigned long current_time_us);
-    void (*log_paper_refill_end)(struct printer* printer, int refill_duration_us,
-                                 unsigned long current_time_us);
-
-    void (*log_ctrl_c_pressed)(struct simulation_statistics* stats);
-    void (*log_statistics)(struct simulation_statistics* stats);
-};
-
-void log_router_set_logger_backend(const struct LoggerBackend* logs);
+// Allow CLI/server to register their respective handlers without creating
+// link-time dependencies in the router.
+void log_router_register_console_handler(const log_ops_t* ops);
+void log_router_register_websocket_handler(const log_ops_t* ops);
 
 // Wrapper API that routes to stdout logger or websocket publisher
 void emit_simulation_parameters(const struct simulation_parameters* params);

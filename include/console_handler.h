@@ -1,5 +1,5 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef CONSOLE_HANDLER_H
+#define CONSOLE_HANDLER_H
 
 struct job;
 struct printer;
@@ -122,4 +122,4 @@ void log_paper_refill_end(struct printer* printer, int refill_duration_us, unsig
  */
 void log_ctrl_c_pressed(struct simulation_statistics* stats);
 
-#endif // LOGGER_H
+#endif // CONSOLE_HANDLER_H

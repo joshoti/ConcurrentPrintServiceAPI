@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "common.h"
 #include "preprocessing.h"
 #include "job_receiver.h"
 #include "printer.h"
 #include "simulation_stats.h"
-#include "logger.h"
+#include "console_handler.h"
 #include "timed_queue.h"
 #include "timeutils.h"
 

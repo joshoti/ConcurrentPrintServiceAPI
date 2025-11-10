@@ -13,7 +13,7 @@
 #include "common.h"
 #include "preprocessing.h"
 #include "log_router.h"
-#include "logger.h"
+#include "console_handler.h"
 #include "simulation_stats.h"
 #include "signalcatcher.h"
 
@@ -119,25 +119,25 @@ int main(int argc, char *argv[]) {
         .all_jobs_arrived = &all_jobs_arrived
     };
 
-    // Bind logger backend for terminal mode
-    struct LoggerBackend logs = {
-        .log_simulation_parameters = log_simulation_parameters,
-        .log_simulation_start = log_simulation_start,
-        .log_simulation_end = log_simulation_end,
-        .log_system_arrival = log_system_arrival,
-        .log_dropped_job = log_dropped_job,
-        .log_removed_job = log_removed_job,
-        .log_queue_arrival = log_queue_arrival,
-        .log_queue_departure = log_queue_departure,
-        .log_printer_arrival = log_printer_arrival,
-        .log_system_departure = log_system_departure,
-        .log_paper_empty = log_paper_empty,
-        .log_paper_refill_start = log_paper_refill_start,
-        .log_paper_refill_end = log_paper_refill_end,
-        .log_ctrl_c_pressed = log_ctrl_c_pressed,
-        .log_statistics = log_statistics,
+    // Register console handler (stdout logger)
+    static const log_ops_t console_handler = {
+        .simulation_parameters = log_simulation_parameters,
+        .simulation_start = log_simulation_start,
+        .simulation_end = log_simulation_end,
+        .system_arrival = log_system_arrival,
+        .dropped_job = log_dropped_job,
+        .removed_job = log_removed_job,
+        .queue_arrival = log_queue_arrival,
+        .queue_departure = log_queue_departure,
+        .printer_arrival = log_printer_arrival,
+        .system_departure = log_system_departure,
+        .paper_empty = log_paper_empty,
+        .paper_refill_start = log_paper_refill_start,
+        .paper_refill_end = log_paper_refill_end,
+        .simulation_stopped = log_ctrl_c_pressed,
+        .statistics = log_statistics,
     };
-    log_router_set_logger_backend(&logs);
+    log_router_register_console_handler(&console_handler);
     // Terminal mode: print to stdout
     set_log_mode(LOG_MODE_TERMINAL);
     // --- Start of simulation logging ---

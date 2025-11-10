@@ -1,5 +1,5 @@
-#ifndef EVENT_PUBLISHER_H
-#define EVENT_PUBLISHER_H
+#ifndef WEBSOCKET_HANDLER_H
+#define WEBSOCKET_HANDLER_H
 
 struct job;
 struct printer;
@@ -129,4 +129,4 @@ void publish_simulation_stopped(struct simulation_statistics* stats);
  */
 void publish_statistics(struct simulation_statistics* stats);
 
-#endif // EVENT_PUBLISHER_H
+#endif // WEBSOCKET_HANDLER_H
